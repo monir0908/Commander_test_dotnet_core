@@ -27,3 +27,5 @@ K:\DOT-NET-CORE-PROJECTS\Commander\obj\Debug\net5.0\Commander.dll
 K:\DOT-NET-CORE-PROJECTS\Commander\obj\Debug\net5.0\ref\Commander.dll
 K:\DOT-NET-CORE-PROJECTS\Commander\obj\Debug\net5.0\Commander.pdb
 K:\DOT-NET-CORE-PROJECTS\Commander\obj\Debug\net5.0\Commander.genruntimeconfig.cache
+K:\DOT-NET-CORE-PROJECTS\Commander\bin\Debug\net5.0\Newtonsoft.Json.dll
+K:\DOT-NET-CORE-PROJECTS\Commander\bin\Debug\net5.0\System.Net.WebSockets.WebSocketProtocol.dll
