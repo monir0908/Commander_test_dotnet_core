@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Commander.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210306103522_MyFirstMigration")]
-    partial class MyFirstMigration
+    [Migration("20210306151104_InitialCreate")]
+    partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -194,6 +194,27 @@ namespace Commander.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("BatchHostParticipant");
+                });
+
+            modelBuilder.Entity("Commander.Models.Command", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("HowTo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Line")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Platform")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Command");
                 });
 
             modelBuilder.Entity("Commander.Models.Conference", b =>

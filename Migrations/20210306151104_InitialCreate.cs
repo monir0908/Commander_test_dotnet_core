@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Commander.Migrations
 {
-    public partial class MyFirstMigration : Migration
+    public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -51,6 +51,21 @@ namespace Commander.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Command",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    HowTo = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Line = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Platform = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Command", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -437,6 +452,9 @@ namespace Commander.Migrations
 
             migrationBuilder.DropTable(
                 name: "BatchHostParticipant");
+
+            migrationBuilder.DropTable(
+                name: "Command");
 
             migrationBuilder.DropTable(
                 name: "Conference");

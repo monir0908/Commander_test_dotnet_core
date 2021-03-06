@@ -194,6 +194,27 @@ namespace Commander.Migrations
                     b.ToTable("BatchHostParticipant");
                 });
 
+            modelBuilder.Entity("Commander.Models.Command", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("HowTo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Line")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Platform")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Command");
+                });
+
             modelBuilder.Entity("Commander.Models.Conference", b =>
                 {
                     b.Property<long>("Id")

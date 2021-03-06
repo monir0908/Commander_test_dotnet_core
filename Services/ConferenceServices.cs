@@ -7,26 +7,18 @@ using Microsoft.EntityFrameworkCore;
 using Commander.Common;
 using Microsoft.Extensions.Configuration;
 
-namespace Commander{
+namespace Commander.Services{
 
 
     public class ConferenceServices : IConferenceServices
     {
-        private static readonly IConfiguration _configuration;
-        private static string _connectionString;
-        private static DbContextOptionsBuilder<ApplicationDbContext> _optionsBuilder;
+        private readonly ApplicationDbContext _context;
 
-        private static readonly ApplicationDbContext _context;
-
-
-
-        static ConferenceServices()
+        public ConferenceServices(ApplicationDbContext context)
         {
-            _optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-            _connectionString = _configuration.GetConnectionString("Cn");
-            _optionsBuilder.UseSqlServer(_connectionString);
-            _context = new ApplicationDbContext(_optionsBuilder.Options);
+            this._context = context;
         }
+        
 
         private bool IsSameRoomAleadyCreated(string roomId)
         {
@@ -315,8 +307,9 @@ namespace Commander{
 
 
                 
+                Helpers h = new Common.Helpers(_context);
 
-                var newRoomNumber = Common.Helpers.GenerateRoomNumber();
+                var newRoomNumber = h.GenerateRoomNumber();
 
                 confObj.RoomId = newRoomNumber;
                 confObj.CreatedDateTime = DateTime.UtcNow;
@@ -421,23 +414,5 @@ namespace Commander{
             }
         }
         
-    }
-
-    public interface IConferenceServices
-    {
-        Task<object> GetProjectListByHostId(string hostId);
-        Task<object> GetBatchListByProjectId(long pId);
-        Task<object> GetParticipantListByBatchId(long batchId);
-        Task<object> GetParticipantListByHostId(string hostId);
-        Task<object> GetOnGoingConferenceByHostId(string hostId);
-
-
-        Task<object> GetHostListByParticipantId(string participantId);
-
-
-        Task<object> CreateConference(Conference confObj);
-        Task<object> EndConference(Conference confObj);
-        Task<object> GetConferenceList();
-
     }
 }

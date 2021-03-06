@@ -62,6 +62,7 @@ namespace Commander.Models
         public DbSet<BatchHostParticipant> BatchHostParticipant { get; set; }
         public DbSet<Conference> Conference{ get; set; }
         public DbSet<ConferenceHistory> ConferenceHistory { get; set; }
+        public DbSet<Command> Command { get; set; }
         #endregion
 
         

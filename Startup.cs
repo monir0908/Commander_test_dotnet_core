@@ -1,18 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Commander.Models;
+using Commander.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
 namespace Commander
@@ -29,17 +23,17 @@ namespace Commander
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-            // Add EF services to the services container.
-            services.AddDbContext<ApplicationDbContext>(options =>
+            
+            services.AddDbContextPool<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("Cn")));
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDefaultTokenProviders();
+                .AddEntityFrameworkStores<ApplicationDbContext>();
+                
 
+            services.AddMvc();
 
-
+            services.AddScoped<IConferenceServices, ConferenceServices>();
 
             services.AddControllers();
             services.AddSignalR();
@@ -83,7 +77,7 @@ namespace Commander
             app.UseCors("CorsPolicy");
             
 
-            app.UseAuthorization();
+            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {
