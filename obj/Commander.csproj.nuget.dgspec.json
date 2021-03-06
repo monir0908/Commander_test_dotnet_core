@@ -1,25 +1,30 @@
 {
   "format": 1,
   "restore": {
-    "K:\\DOT-NET-CORE-PROJECTS\\Commander\\Commander.csproj": {}
+    "C:\\MONIR-DOTNET-CORE-PROJECTS\\signalR_dotnet_core_101\\Commander.csproj": {}
   },
   "projects": {
-    "K:\\DOT-NET-CORE-PROJECTS\\Commander\\Commander.csproj": {
+    "C:\\MONIR-DOTNET-CORE-PROJECTS\\signalR_dotnet_core_101\\Commander.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "K:\\DOT-NET-CORE-PROJECTS\\Commander\\Commander.csproj",
+        "projectUniqueName": "C:\\MONIR-DOTNET-CORE-PROJECTS\\signalR_dotnet_core_101\\Commander.csproj",
         "projectName": "Commander",
-        "projectPath": "K:\\DOT-NET-CORE-PROJECTS\\Commander\\Commander.csproj",
+        "projectPath": "C:\\MONIR-DOTNET-CORE-PROJECTS\\signalR_dotnet_core_101\\Commander.csproj",
         "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "K:\\DOT-NET-CORE-PROJECTS\\Commander\\obj\\",
+        "outputPath": "C:\\MONIR-DOTNET-CORE-PROJECTS\\signalR_dotnet_core_101\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
         "configFilePaths": [
-          "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net5.0"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -41,6 +46,12 @@
             "Microsoft.AspNetCore.SignalR": {
               "target": "Package",
               "version": "[1.1.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[5.0.3, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
@@ -65,7 +76,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.103\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.200\\RuntimeIdentifierGraph.json"
         }
       }
     }
