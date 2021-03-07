@@ -6,6 +6,7 @@ using Commander.Models;
 using Microsoft.EntityFrameworkCore;
 using Commander.Common;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Commander.Services{
 
@@ -13,10 +14,12 @@ namespace Commander.Services{
     public class ConferenceServices : IConferenceServices
     {
         private readonly ApplicationDbContext _context;
+        private readonly IHubContext<SignalHub> _notificationHubContext;
 
-        public ConferenceServices(ApplicationDbContext context)
+        public ConferenceServices(ApplicationDbContext context, IHubContext<SignalHub> hubContext)
         {
             this._context = context;
+            this._notificationHubContext = hubContext;
         }
         
 
@@ -309,23 +312,36 @@ namespace Commander.Services{
                 
                 Helpers h = new Common.Helpers(_context);
 
-                var newRoomNumber = h.GenerateRoomNumber();
+                var newlastRoomNumber = h.GenerateRoomNumber();
 
-                confObj.RoomId = newRoomNumber;
+
+                // string lastRoomNumber = _context.Conference.OrderByDescending(x => x.Id).Select(x => x.RoomId).FirstOrDefault();
+                // if (lastRoomNumber == null)
+                // {
+                //     return "Room-101";
+                // }
+                // var splitItems = lastRoomNumber.Split(new string[] { "Room-" }, StringSplitOptions.None);
+                // int lastRoomNumberInt = Convert.ToInt32(splitItems[1]);
+                // int newlastRoomNumberInt = lastRoomNumberInt + 1;
+                // lastRoomNumber = "Room-" + Convert.ToString(newlastRoomNumberInt);
+
+                confObj.RoomId = newlastRoomNumber;
                 confObj.CreatedDateTime = DateTime.UtcNow;
                 confObj.Status = "On-Going";
                 _context.Conference.Add(confObj);
                 await _context.SaveChangesAsync();
 
 
+                string myParticipantId = _context.Conference.Where(c=>c.HostId == confObj.HostId && c.Status == "On-Going").Select(c=> c.ParticipantId).FirstOrDefault();
                 // Now, signalR comes into play
-                //_notificationHubContext.Clients.All.onConferenceCreation(confObj.ParticipantId);
+                await _notificationHubContext.Clients.All.SendAsync("Created", "2b298d72-f6f3-4a39-8ea1-683e5880f7f9");
 
                 return new
                 {
                     Success = true,
                     Message = "Successfully conference created !",
-                    CurrentConfRoomId = confObj.RoomId
+                    CurrentConfRoomId = confObj.RoomId,
+                    ConferenceId = confObj.Id,
                 };
             }
             catch (Exception ex)
@@ -353,6 +369,13 @@ namespace Commander.Services{
                     existingConf.Status = "Closed";
                     await _context.SaveChangesAsync();
 
+
+                    string myParticipantId = _context.Conference.Where(c=>c.HostId == confObj.HostId && c.Status == "On-Going").Select(c=> c.ParticipantId).FirstOrDefault();
+
+                    // Now, signalR comes into play
+                    await _notificationHubContext.Clients.All.SendAsync("Ended", "2b298d72-f6f3-4a39-8ea1-683e5880f7f9");
+
+
                     return new
                     {
                         Success = true,
@@ -366,6 +389,49 @@ namespace Commander.Services{
                     Message = "No conference found !"
                 };
 
+                
+
+
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    Success = false,
+                    ex.Message
+                };
+            }
+        }
+
+
+        public async Task<object> JoinConferenceByHost(Conference confObj)
+        {
+
+            try
+            {                
+                Conference existingConf =
+                    _context.Conference.Where(x => x.RoomId == confObj.RoomId).Select(x => x).FirstOrDefault();
+
+                if (existingConf != null)
+                {
+
+                    string myParticipantId = _context.Conference.Where(c=>c.HostId == confObj.HostId && c.Status == "On-Going").Select(c=> c.ParticipantId).FirstOrDefault();
+                    // Now, signalR comes into play
+                    await _notificationHubContext.Clients.All.SendAsync("Joined", myParticipantId);
+
+
+                    return new
+                    {
+                        Success = true,
+                        Message = "Successfully conference joined by Host !"
+                    };
+                }
+
+                return new
+                {
+                    Success = false,
+                    Message = "No conference found !"
+                };
                 
 
 

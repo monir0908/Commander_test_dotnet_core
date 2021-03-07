@@ -82,6 +82,12 @@ namespace Commander.Controllers
         {
             return Ok(await _services.EndConference(confObj));
         }
+        
+        [HttpPost, Route("JoinConferenceByHost")]
+        public async Task<IActionResult> JoinConferenceByHost(Conference confObj)
+        {
+            return Ok(await _services.JoinConferenceByHost(confObj));
+        }
 
         [HttpGet, Route("GetConferenceList")]
         public async Task<IActionResult> GetConferenceList()

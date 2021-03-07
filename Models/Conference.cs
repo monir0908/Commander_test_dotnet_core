@@ -6,7 +6,7 @@ namespace Commander.Models{
 
     public class Conference : NumberEntityField
     {
-        [Required, StringLength(750)]
+        [StringLength(750)]
         public string RoomId { get; set; }
 
 

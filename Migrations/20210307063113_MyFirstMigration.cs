@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Commander.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class MyFirstMigration : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -66,22 +66,6 @@ namespace Commander.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Command", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ConferenceHistory",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ConferenceId = table.Column<string>(type: "nvarchar(750)", maxLength: 750, nullable: false),
-                    JoinedPersonName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
-                    JoineDateTime = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    LeaveDateTime = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ConferenceHistory", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -205,6 +189,37 @@ namespace Commander.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ConferenceHistory",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ConferenceId = table.Column<string>(type: "nvarchar(750)", maxLength: 750, nullable: false),
+                    RoomId = table.Column<string>(type: "nvarchar(750)", maxLength: 750, nullable: true),
+                    HostId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ParticipantId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    SocketId = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: true),
+                    JoineDateTime = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    LeaveDateTime = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ConferenceHistory", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ConferenceHistory_AspNetUsers_HostId",
+                        column: x => x.HostId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ConferenceHistory_AspNetUsers_ParticipantId",
+                        column: x => x.ParticipantId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Batch",
                 columns: table => new
                 {
@@ -305,7 +320,7 @@ namespace Commander.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    RoomId = table.Column<string>(type: "nvarchar(750)", maxLength: 750, nullable: false),
+                    RoomId = table.Column<string>(type: "nvarchar(750)", maxLength: 750, nullable: true),
                     HostId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     ParticipantId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     BatchId = table.Column<long>(type: "bigint", nullable: false),
@@ -428,6 +443,16 @@ namespace Commander.Migrations
                 name: "IX_Conference_ParticipantId",
                 table: "Conference",
                 column: "ParticipantId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ConferenceHistory_HostId",
+                table: "ConferenceHistory",
+                column: "HostId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ConferenceHistory_ParticipantId",
+                table: "ConferenceHistory",
+                column: "ParticipantId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -466,10 +491,10 @@ namespace Commander.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "Batch");
 
             migrationBuilder.DropTable(
-                name: "Batch");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "Project");

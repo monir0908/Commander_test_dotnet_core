@@ -235,7 +235,6 @@ namespace Commander.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("RoomId")
-                        .IsRequired()
                         .HasMaxLength(750)
                         .HasColumnType("nvarchar(750)");
 
@@ -266,17 +265,31 @@ namespace Commander.Migrations
                         .HasMaxLength(750)
                         .HasColumnType("nvarchar(750)");
 
+                    b.Property<string>("HostId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<DateTime?>("JoineDateTime")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("JoinedPersonName")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
 
                     b.Property<DateTime?>("LeaveDateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("ParticipantId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RoomId")
+                        .HasMaxLength(750)
+                        .HasColumnType("nvarchar(750)");
+
+                    b.Property<string>("SocketId")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("HostId");
+
+                    b.HasIndex("ParticipantId");
 
                     b.ToTable("ConferenceHistory");
                 });
@@ -521,6 +534,23 @@ namespace Commander.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Batch");
+
+                    b.Navigation("Host");
+
+                    b.Navigation("Participant");
+                });
+
+            modelBuilder.Entity("Commander.Models.ConferenceHistory", b =>
+                {
+                    b.HasOne("Commander.Models.ApplicationUser", "Host")
+                        .WithMany()
+                        .HasForeignKey("HostId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Commander.Models.ApplicationUser", "Participant")
+                        .WithMany()
+                        .HasForeignKey("ParticipantId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Host");
 
