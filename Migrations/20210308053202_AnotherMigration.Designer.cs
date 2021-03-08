@@ -4,14 +4,16 @@ using Commander.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Commander.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210308053202_AnotherMigration")]
+    partial class AnotherMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -225,10 +227,6 @@ namespace Commander.Migrations
                     b.Property<long>("BatchId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("ConnectionId")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
                     b.Property<DateTime?>("CreatedDateTime")
                         .HasColumnType("datetime2");
 
@@ -267,10 +265,6 @@ namespace Commander.Migrations
                     b.Property<double?>("ConferenceId")
                         .HasColumnType("float");
 
-                    b.Property<string>("ConnectionId")
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
                     b.Property<string>("HostId")
                         .HasColumnType("nvarchar(450)");
 
@@ -286,6 +280,10 @@ namespace Commander.Migrations
                     b.Property<string>("RoomId")
                         .HasMaxLength(750)
                         .HasColumnType("nvarchar(750)");
+
+                    b.Property<string>("SocketId")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
 
                     b.HasKey("Id");
 

@@ -6,8 +6,8 @@ namespace Commander.Models{
 
     public class ConferenceHistory : NumberEntityField
     {
-        [Required, StringLength(750)]
-        public string ConferenceId { get; set; }
+        
+        public double? ConferenceId { get; set; }
 
         [StringLength(750)]
         public string RoomId { get; set; }
@@ -22,7 +22,7 @@ namespace Commander.Models{
         public string ParticipantId { get; set; }
 
         [MaxLength(150)]
-        public string SocketId { get; set;}
+        public string ConnectionId { get; set;}
 
         public DateTime? JoineDateTime { get; set; }
         public DateTime? LeaveDateTime { get; set; }

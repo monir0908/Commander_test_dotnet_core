@@ -23,8 +23,10 @@ namespace Commander.Services{
 
 
         Task<object> CreateConference(Conference confObj);
-        Task<object> EndConference(Conference confObj);
         Task<object> JoinConferenceByHost(Conference confObj);
+        Task<object> JoinConferenceByParticipant(Conference confObj);
+        Task<object> EndConference(Conference confObj);
+        Task<object> EndConferenceByParticipant(Conference confObj);
         Task<object> GetConferenceList();
 
     }

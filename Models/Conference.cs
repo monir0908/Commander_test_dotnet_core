@@ -27,6 +27,9 @@ namespace Commander.Models{
         [MaxLength(50)]
         public string Status { get; set; }  //On-Going, Finished
 
+        [MaxLength(150)]
+        public string ConnectionId { get; set;}
+
 
     }
 }

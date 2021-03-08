@@ -76,6 +76,19 @@ namespace Commander.Controllers
         {
             return Ok(await _services.CreateConference(confObj));
         }
+        
+        
+        [HttpPost, Route("JoinConferenceByHost")]
+        public async Task<IActionResult> JoinConferenceByHost(Conference confObj)
+        {
+            return Ok(await _services.JoinConferenceByHost(confObj));
+        }
+        
+        [HttpPost, Route("JoinConferenceByParticipant")]
+        public async Task<IActionResult> JoinConferenceByParticipant(Conference confObj)
+        {
+            return Ok(await _services.JoinConferenceByParticipant(confObj));
+        }
 
         [HttpPost, Route("EndConference")]
         public async Task<IActionResult> EndConference(Conference confObj)
@@ -83,10 +96,11 @@ namespace Commander.Controllers
             return Ok(await _services.EndConference(confObj));
         }
         
-        [HttpPost, Route("JoinConferenceByHost")]
-        public async Task<IActionResult> JoinConferenceByHost(Conference confObj)
+
+        [HttpPost, Route("EndConferenceByParticipant")]
+        public async Task<IActionResult> EndCEndConferenceByParticipantonference(Conference confObj)
         {
-            return Ok(await _services.JoinConferenceByHost(confObj));
+            return Ok(await _services.EndConferenceByParticipant(confObj));
         }
 
         [HttpGet, Route("GetConferenceList")]
