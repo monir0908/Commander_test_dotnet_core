@@ -28,6 +28,9 @@ namespace Commander.Services{
         Task<object> EndConference(Conference confObj);
         Task<object> EndConferenceByParticipant(Conference confObj);
         Task<object> GetConferenceList();
+        Task<object> TestApi();
+        Task<object> GetCallingHistoryByDaterange(DateTimeParams obj);
+        Task<object> GetConferenceHistoryDetailById(long confId);
 
     }
 }

@@ -76,6 +76,10 @@
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[5.6.3, )"
+            },
+            "TimePeriodLibrary.NET": {
+              "target": "Package",
+              "version": "[2.1.1, )"
             }
           },
           "imports": [

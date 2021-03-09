@@ -7,9 +7,11 @@ using Microsoft.EntityFrameworkCore;
 using Commander.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.SignalR;
+using Itenso.TimePeriod;
 
 namespace Commander.Services{
 
+    
 
     public class ConferenceServices : IConferenceServices
     {
@@ -648,7 +650,8 @@ namespace Commander.Services{
 
                 }).ToListAsync();
 
-                var count = await query.CountAsync();
+                var count = await query.CountAsync();               
+
 
                 return new
                 {
@@ -666,6 +669,156 @@ namespace Commander.Services{
                 };
             }
         }
+        public async Task<object> TestApi()
+        {
+
+            await _context.Command.Select(c => c).ToListAsync();
+
+            //=======================================================
+
+                TimeRange timeRange1 = new TimeRange(
+                    new DateTime( 2011, 2, 22, 12, 0, 0 ),
+                    new DateTime( 2011, 2, 22, 16, 0, 0 ) );
+                Console.WriteLine( "TimeRange1: " + timeRange1 );
+
+
+                TimeRange timeRange2 = new TimeRange(
+                    new DateTime( 2011, 2, 22, 15, 0, 0 ),
+                    new DateTime( 2011, 2, 22, 18, 0, 0 ) );
+                Console.WriteLine( "TimeRange2: " + timeRange2 );
+
+
+                TimeRange timeRange3 = new TimeRange(
+                    new DateTime( 2011, 2, 22, 15, 0, 0 ),
+                    new DateTime( 2011, 2, 22, 21, 0, 0 ) );
+                Console.WriteLine( "TimeRange3: " + timeRange3 );
+
+                Console.WriteLine( "Relation Between TimeRange 1 and TimeRange 2 : " +
+                     timeRange1.GetRelation( timeRange2 ) );
+
+
+                Console.WriteLine( "Relation Between TimeRange 1 and TimeRange 3 : " +
+                                    timeRange1.GetRelation( timeRange3 ) );
+                
+                Console.WriteLine( "Relation Between TimeRange 3 and TimeRange 2 : "+
+                                    timeRange3.GetRelation( timeRange2 ) );
+
+
+                // --- intersection ---
+                Console.WriteLine( "TimeRange1.GetIntersection( TimeRange2 ): " +
+                                    timeRange1.GetIntersection( timeRange2 ) );
+
+                // --- intersection ---
+                Console.WriteLine( "TimeRange2.GetIntersection( TimeRange3 ): " +
+                                    timeRange2.GetIntersection( timeRange3 ) );
+
+                
+                var a = timeRange2.GetIntersection( timeRange3 );
+                Console.WriteLine(a);
+
+
+            //    var hostDate = new DateTime(2008, 3, 1, 7, 0, 0);
+            //    var participantDate =  new DateTime(2008, 3, 1, 7, 0, 0);
+
+            //    Tuple<DateTime, DateTime> ranges = new Tuple<DateTime, DateTime>(hostDate,participantDate);
+               
+               
+            //    bool result = Overlap(ranges);
+            //    Console.WriteLine(result);
+
+            var hostStart = new DateTime(2008, 3, 1, 7, 0, 0);
+            var hostEnd = new DateTime(2011, 3, 1, 7, 0, 0);
+
+            var participantStart = new DateTime(2012, 3, 1, 13, 15, 20);
+            var participantEnd = new DateTime(2012, 3, 1, 13, 27, 25);
+
+            // DateTime a = new DateTime(2010, 05, 12, 13, 15, 00);
+            // DateTime b = new DateTime(2010, 05, 12, 13, 45, 00);
+
+
+            bool result = intersects(hostStart, hostEnd, participantStart, participantEnd);
+            Console.WriteLine(result);
+
+            TimeSpan diff = participantEnd - participantStart;
+            Console.WriteLine(diff);
+
+
+
+                //=======================================================
+
+            return new
+            {
+                Success = true,
+            };
+            
+        }
+
+        public async Task<object> GetCallingHistoryByDaterange(DateTimeParams obj)
+        {
+
+            var data =  await _context.ConferenceHistory
+            .Where(cs => cs.JoineDateTime >= obj.StartDate && cs.JoineDateTime <= cs.LeaveDateTime && cs.HostId !=null)
+            .Select(cs => new{
+                    Id = cs.ConferenceId,
+                    cs.RoomId,
+                    cs.HostId,
+                    HostFirstName = cs.Host.FirstName,
+                    // cs.ParticipantId,
+                    // ParticipantFirstName = cs.Participant.FirstName,
+            }).ToListAsync(); 
+            
+            Console.WriteLine(obj.StartDate);
+            Console.WriteLine(obj.EndDate);
+
+            return new
+            {
+                Success = true,
+                Records = data
+            };
+            
+        }
+
+        public async Task<object> GetConferenceHistoryDetailById(long confId)
+        {
+
+            var data =  await _context.ConferenceHistory
+            .Where(cs => cs.ConferenceId == confId)
+            .Select(cs => new{
+                    Id = cs.ConferenceId,
+                    cs.RoomId,
+                    cs.HostId,
+                    HostFirstName = cs.Host.FirstName,
+                    cs.ParticipantId,
+                    ParticipantFirstName = cs.Participant.FirstName,
+                    cs.JoineDateTime,
+                    cs.LeaveDateTime
+            }).ToListAsync(); 
+
+            return new
+            {
+                Success = true,
+                Records = data
+            };
+            
+        }
+        // private bool Overlap(params Tuple<DateTime, DateTime>[] ranges){
+        //     for (int i = 0; i < ranges.Length; i++)
+        //     {
+        //         for (int j = i + 1; j < ranges.Length; j++)
+        //         {
+        //             if (!(ranges[i].Item1 <= ranges[j].Item2 && ranges[i].Item2 >= ranges[j].Item1))
+        //                 return false;
+
+        //         }
+        //     }
+        //     return true;
+        // }
+
+         private bool intersects(DateTime r1start, DateTime r1end, DateTime r2start, DateTime r2end){
+            return (r1start == r2start) || (r1start > r2start ? r1start <= r2end : r2start <= r1end);
+        }
         
     }
 }
+
+

@@ -43,7 +43,9 @@ namespace Commander
             var connectionId = Context.ConnectionId;
             Clients.All.SendAsync("BrowserRefreshedOrInternetInteruption", connectionId);
 
-            ConferenceHistory existingConfHistory = _context.ConferenceHistory.Where(x =>x.ConnectionId == connectionId ).Select(x => x).FirstOrDefault();
+            Console.WriteLine(connectionId);
+
+            ConferenceHistory existingConfHistory = _context.ConferenceHistory.Where(x =>x.ConnectionId == connectionId ).Select(x => x).OrderByDescending(x=> x.Id).FirstOrDefault();
 
             if(existingConfHistory !=null && existingConfHistory.HostId !=null){
                 existingConfHistory.LeaveDateTime = DateTime.UtcNow;
@@ -71,6 +73,10 @@ namespace Commander
                 // Now, signalR comes into play
                 Clients.All.SendAsync("BrowserRefreshedOrInternetInteruption", existingConf.ParticipantId);
             }
+
+            // Console.WriteLine(existingConfHistory !=null);
+            // Console.WriteLine(existingConfHistory.ParticipantId);
+
 
 
             if(existingConfHistory !=null && existingConfHistory.ParticipantId !=null){

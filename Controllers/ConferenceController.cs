@@ -109,6 +109,24 @@ namespace Commander.Controllers
             return Ok(await _services.GetConferenceList());
         }
 
+        [HttpGet, Route("TestApi")]
+        public async Task<IActionResult> TestApi()
+        {
+            return Ok(await _services.TestApi());
+        }
+
+        [HttpPost, Route("GetCallingHistoryByDaterange")]
+        public async Task<IActionResult> GetCallingHistoryByDaterange(DateTimeParams obj)
+        {
+            return Ok(await _services.GetCallingHistoryByDaterange(obj));
+        }
+
+        [HttpGet, Route("GetConferenceHistoryDetailById/{confId}")]
+        public async Task<IActionResult> GetConferenceHistoryDetailById(long confId)
+        {
+            return Ok(await _services.GetConferenceHistoryDetailById(confId));
+        }
+
 
     }
 }
