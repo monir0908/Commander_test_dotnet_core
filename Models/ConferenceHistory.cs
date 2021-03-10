@@ -7,7 +7,7 @@ namespace Commander.Models{
     public class ConferenceHistory : NumberEntityField
     {
         
-        public double? ConferenceId { get; set; }
+        public long ConferenceId { get; set; }
 
         [StringLength(750)]
         public string RoomId { get; set; }

@@ -465,7 +465,7 @@ namespace Commander.Services{
 
                     //Participant LeaveDatetime setting
                     ConferenceHistory confHistoryObj2 = _context.ConferenceHistory.Where(c=> c.ConferenceId == existingConf.Id && c.ParticipantId == existingConf.ParticipantId).Select(c=> c).OrderByDescending(c => c.Id).FirstOrDefault();
-                    if(confHistoryObj2 !=null){
+                    if(confHistoryObj2 !=null && confHistoryObj2.LeaveDateTime ==null){
                         confHistoryObj2.LeaveDateTime = DateTime.UtcNow;
                         await _context.SaveChangesAsync();
                     }
@@ -509,39 +509,32 @@ namespace Commander.Services{
         public async Task<object> EndConferenceByParticipant(Conference confObj)
         {
 
+            Console.WriteLine(confObj.RoomId);
+
             try
             {
 
 
-                Conference existingConf =
-                    _context.Conference.Where(x => 
-                    x.HostId == confObj.HostId && 
-                    x.ParticipantId == confObj.ParticipantId && 
-                    x.RoomId == confObj.RoomId && 
-                    x.Status == "On-Going").Select(x => x).FirstOrDefault();
+                    ConferenceHistory confHistoryObj = _context.ConferenceHistory
+                    .Where(c=> c.RoomId == confObj.RoomId && c.ParticipantId == confObj.ParticipantId && c.LeaveDateTime ==null)
+                    .Select(c=> c).OrderByDescending(c => c.Id)
+                    .FirstOrDefault();
 
-                if (existingConf != null)
-                {
+                    if(confHistoryObj !=null){
+                        confHistoryObj.LeaveDateTime = DateTime.UtcNow;
+                        await _context.SaveChangesAsync();
 
-                    // string myParticipantId = _context.Conference.Where(c=>c.HostId == confObj.HostId && c.Status == "On-Going").Select(c=> c.ParticipantId).FirstOrDefault();
-
-
-                    // existingConf.Status = "Closed";
-                    // await _context.SaveChangesAsync();
-
-
-
-
-
-                    ConferenceHistory confHistoryObj = _context.ConferenceHistory.Where(c=> c.ConferenceId == existingConf.Id && c.ParticipantId == existingConf.ParticipantId).Select(c=> c).OrderByDescending(c => c.Id).FirstOrDefault();
-                    confHistoryObj.LeaveDateTime = DateTime.UtcNow;
-                    await _context.SaveChangesAsync();
-
-
-                   
+                    }
+                    else{
+                        return new
+                        {
+                            Success = false,
+                            Message = "Participant 'LeaveDateTime' is already set."
+                        };
+                    }
 
                     // Now, signalR comes into play
-                    await _notificationHubContext.Clients.All.SendAsync("EndedByParticipant", existingConf.HostId);
+                    await _notificationHubContext.Clients.All.SendAsync("EndedByParticipant", confObj.HostId);
 
 
                     return new
@@ -549,16 +542,6 @@ namespace Commander.Services{
                         Success = true,
                         Message = "Successfully conference ended !"
                     };
-                }
-
-                return new
-                {
-                    Success = false,
-                    Message = "No On-Going conference found !"
-                };
-
-                
-
 
             }
             catch (Exception ex)
@@ -569,6 +552,83 @@ namespace Commander.Services{
                     ex.Message
                 };
             }
+
+            // try
+            // {
+
+
+            //     Conference existingConf =
+            //         _context.Conference.Where(x => 
+            //         x.HostId == confObj.HostId && 
+            //         x.ParticipantId == confObj.ParticipantId && 
+            //         x.RoomId == confObj.RoomId && 
+            //         x.Status == "On-Going").Select(x => x).FirstOrDefault();
+
+            //     if (existingConf != null)
+            //     {
+
+            //         // string myParticipantId = _context.Conference.Where(c=>c.HostId == confObj.HostId && c.Status == "On-Going").Select(c=> c.ParticipantId).FirstOrDefault();
+
+
+            //         // existingConf.Status = "Closed";
+            //         // await _context.SaveChangesAsync();
+
+
+
+
+
+            //         ConferenceHistory confHistoryObj = _context.ConferenceHistory
+            //         .Where(c=> c.ConferenceId == existingConf.Id && c.ParticipantId == existingConf.ParticipantId && c.LeaveDateTime ==null)
+            //         .Select(c=> c).OrderByDescending(c => c.Id)
+            //         .FirstOrDefault();
+
+            //         if(confHistoryObj !=null){
+            //             confHistoryObj.LeaveDateTime = DateTime.UtcNow;
+            //             await _context.SaveChangesAsync();
+
+            //         }
+            //         else{
+            //             return new
+            //             {
+            //                 Success = false,
+            //                 Message = "Participant 'LeaveDateTime' is already set."
+            //             };
+            //         }
+                    
+                    
+
+
+                   
+
+            //         // Now, signalR comes into play
+            //         await _notificationHubContext.Clients.All.SendAsync("EndedByParticipant", existingConf.HostId);
+
+
+            //         return new
+            //         {
+            //             Success = true,
+            //             Message = "Successfully conference ended !"
+            //         };
+            //     }
+
+            //     return new
+            //     {
+            //         Success = false,
+            //         Message = "No On-Going conference found !"
+            //     };
+
+                
+
+
+            // }
+            // catch (Exception ex)
+            // {
+            //     return new
+            //     {
+            //         Success = false,
+            //         ex.Message
+            //     };
+            // }
         }
 
         public async Task<object> JoinConferenceByParticipant(Conference confObj)
@@ -669,92 +729,10 @@ namespace Commander.Services{
                 };
             }
         }
-        public async Task<object> TestApi()
-        {
-
-            await _context.Command.Select(c => c).ToListAsync();
-
-            //=======================================================
-
-                TimeRange timeRange1 = new TimeRange(
-                    new DateTime( 2011, 2, 22, 12, 0, 0 ),
-                    new DateTime( 2011, 2, 22, 16, 0, 0 ) );
-                Console.WriteLine( "TimeRange1: " + timeRange1 );
-
-
-                TimeRange timeRange2 = new TimeRange(
-                    new DateTime( 2011, 2, 22, 15, 0, 0 ),
-                    new DateTime( 2011, 2, 22, 18, 0, 0 ) );
-                Console.WriteLine( "TimeRange2: " + timeRange2 );
-
-
-                TimeRange timeRange3 = new TimeRange(
-                    new DateTime( 2011, 2, 22, 15, 0, 0 ),
-                    new DateTime( 2011, 2, 22, 21, 0, 0 ) );
-                Console.WriteLine( "TimeRange3: " + timeRange3 );
-
-                Console.WriteLine( "Relation Between TimeRange 1 and TimeRange 2 : " +
-                     timeRange1.GetRelation( timeRange2 ) );
-
-
-                Console.WriteLine( "Relation Between TimeRange 1 and TimeRange 3 : " +
-                                    timeRange1.GetRelation( timeRange3 ) );
-                
-                Console.WriteLine( "Relation Between TimeRange 3 and TimeRange 2 : "+
-                                    timeRange3.GetRelation( timeRange2 ) );
-
-
-                // --- intersection ---
-                Console.WriteLine( "TimeRange1.GetIntersection( TimeRange2 ): " +
-                                    timeRange1.GetIntersection( timeRange2 ) );
-
-                // --- intersection ---
-                Console.WriteLine( "TimeRange2.GetIntersection( TimeRange3 ): " +
-                                    timeRange2.GetIntersection( timeRange3 ) );
-
-                
-                var a = timeRange2.GetIntersection( timeRange3 );
-                Console.WriteLine(a);
-
-
-            //    var hostDate = new DateTime(2008, 3, 1, 7, 0, 0);
-            //    var participantDate =  new DateTime(2008, 3, 1, 7, 0, 0);
-
-            //    Tuple<DateTime, DateTime> ranges = new Tuple<DateTime, DateTime>(hostDate,participantDate);
-               
-               
-            //    bool result = Overlap(ranges);
-            //    Console.WriteLine(result);
-
-            var hostStart = new DateTime(2008, 3, 1, 7, 0, 0);
-            var hostEnd = new DateTime(2011, 3, 1, 7, 0, 0);
-
-            var participantStart = new DateTime(2012, 3, 1, 13, 15, 20);
-            var participantEnd = new DateTime(2012, 3, 1, 13, 27, 25);
-
-            // DateTime a = new DateTime(2010, 05, 12, 13, 15, 00);
-            // DateTime b = new DateTime(2010, 05, 12, 13, 45, 00);
-
-
-            bool result = intersects(hostStart, hostEnd, participantStart, participantEnd);
-            Console.WriteLine(result);
-
-            TimeSpan diff = participantEnd - participantStart;
-            Console.WriteLine(diff);
-
-
-
-                //=======================================================
-
-            return new
-            {
-                Success = true,
-            };
-            
-        }
-
+        
         public async Task<object> GetCallingHistoryByDaterange(DateTimeParams obj)
         {
+            Helpers h = new Helpers(_context);
 
             var data =  await _context.ConferenceHistory
             .Where(cs => cs.JoineDateTime >= obj.StartDate && cs.JoineDateTime <= cs.LeaveDateTime && cs.HostId !=null)
@@ -765,6 +743,7 @@ namespace Commander.Services{
                     HostFirstName = cs.Host.FirstName,
                     // cs.ParticipantId,
                     // ParticipantFirstName = cs.Participant.FirstName,
+                    ConferenceCallDetail = h.GetEffectiveCallDurationBetweenHostAndParticipant(cs.ConferenceId),
             }).ToListAsync(); 
             
             Console.WriteLine(obj.StartDate);
@@ -780,6 +759,8 @@ namespace Commander.Services{
 
         public async Task<object> GetConferenceHistoryDetailById(long confId)
         {
+
+            Helpers h = new Helpers(_context);
 
             var data =  await _context.ConferenceHistory
             .Where(cs => cs.ConferenceId == confId)
@@ -801,21 +782,151 @@ namespace Commander.Services{
             };
             
         }
-        // private bool Overlap(params Tuple<DateTime, DateTime>[] ranges){
-        //     for (int i = 0; i < ranges.Length; i++)
-        //     {
-        //         for (int j = i + 1; j < ranges.Length; j++)
-        //         {
-        //             if (!(ranges[i].Item1 <= ranges[j].Item2 && ranges[i].Item2 >= ranges[j].Item1))
-        //                 return false;
+        
 
-        //         }
-        //     }
-        //     return true;
-        // }
+        public async Task<object> TestApi()
+        {
 
-         private bool intersects(DateTime r1start, DateTime r1end, DateTime r2start, DateTime r2end){
-            return (r1start == r2start) || (r1start > r2start ? r1start <= r2end : r2start <= r1end);
+            await _context.Command.Select(c => c).ToListAsync();
+
+            //=======================================================
+
+            //     TimeRange timeRange1 = new TimeRange(
+            //         new DateTime( 2011, 2, 22, 12, 0, 0 ),
+            //         new DateTime( 2011, 2, 22, 16, 0, 0 ) );
+            //     Console.WriteLine( "TimeRange1: " + timeRange1 );
+
+
+            //     TimeRange timeRange2 = new TimeRange(
+            //         new DateTime( 2011, 2, 22, 15, 0, 0 ),
+            //         new DateTime( 2011, 2, 22, 18, 0, 0 ) );
+            //     Console.WriteLine( "TimeRange2: " + timeRange2 );
+
+
+            //     TimeRange timeRange3 = new TimeRange(
+            //         new DateTime( 2011, 2, 22, 15, 0, 0 ),
+            //         new DateTime( 2011, 2, 22, 21, 0, 0 ) );
+            //     Console.WriteLine( "TimeRange3: " + timeRange3 );
+
+            //     Console.WriteLine( "Relation Between TimeRange 1 and TimeRange 2 : " +
+            //          timeRange1.GetRelation( timeRange2 ) );
+
+
+            //     Console.WriteLine( "Relation Between TimeRange 1 and TimeRange 3 : " +
+            //                         timeRange1.GetRelation( timeRange3 ) );
+                
+            //     Console.WriteLine( "Relation Between TimeRange 3 and TimeRange 2 : "+
+            //                         timeRange3.GetRelation( timeRange2 ) );
+
+
+            //     // --- intersection ---
+            //     Console.WriteLine( "TimeRange1.GetIntersection( TimeRange2 ): " +
+            //                         timeRange1.GetIntersection( timeRange2 ) );
+
+            //     // --- intersection ---
+            //     Console.WriteLine( "TimeRange2.GetIntersection( TimeRange3 ): " +
+            //                         timeRange2.GetIntersection( timeRange3 ) );
+
+                
+            //     var a = timeRange2.GetIntersection( timeRange3 );
+            //     Console.WriteLine(a);
+
+
+            // //    var hostDate = new DateTime(2008, 3, 1, 7, 0, 0);
+            // //    var participantDate =  new DateTime(2008, 3, 1, 7, 0, 0);
+
+            // //    Tuple<DateTime, DateTime> ranges = new Tuple<DateTime, DateTime>(hostDate,participantDate);
+               
+               
+            // //    bool result = Overlap(ranges);
+            // //    Console.WriteLine(result);
+
+            // var hostStart = new DateTime(2008, 3, 1, 7, 0, 0);
+            // var hostEnd = new DateTime(2011, 3, 1, 7, 0, 0);
+
+            // var participantStart = new DateTime(2012, 3, 1, 13, 15, 20);
+            // var participantEnd = new DateTime(2012, 3, 1, 13, 27, 25);
+
+            // // DateTime a = new DateTime(2010, 05, 12, 13, 15, 00);
+            // // DateTime b = new DateTime(2010, 05, 12, 13, 45, 00);
+
+
+            // bool result = intersects(hostStart, hostEnd, participantStart, participantEnd);
+            // Console.WriteLine(result);
+
+            // TimeSpan diff = participantEnd - participantStart;
+            // Console.WriteLine(diff);
+
+
+
+            //=======================================================
+            // TimeSpan result = new TimeSpan();  
+
+            var confHistoryObj = _context.ConferenceHistory
+            .Where(cs => cs.ConferenceId == 305)
+            .Select(cs => new{
+                cs.ConferenceId,
+                cs.HostId,
+                cs.ParticipantId,
+                cs.RoomId,
+                cs.JoineDateTime,
+                cs.LeaveDateTime
+            }).ToList();
+
+            var hostObj = confHistoryObj
+            .Where(cs => cs.HostId !=null)
+            .Select(cs => cs)
+            .FirstOrDefault();
+
+            var participantObjs = confHistoryObj
+            .Where(cs => cs.ParticipantId !=null)
+            .Select(cs => cs)
+            .ToList();
+
+            //(StartDate1 <= EndDate2) and (StartDate2 <= EndDate1)
+            int count = 0;
+            TimeSpan? diff;
+            TimeSpan? actualCallDuration = new TimeSpan(0,0,0);
+
+            foreach(var i in participantObjs){
+
+                count = count + 1;
+
+                var particpantStartDate = i.JoineDateTime;
+                var particpantEndDate = i.LeaveDateTime;
+
+
+                //Note: in case, participant joins in earlier than host and leaves later than host.
+                if(hostObj.JoineDateTime> particpantStartDate){
+                    particpantStartDate = hostObj.JoineDateTime;
+                }
+                if(hostObj.LeaveDateTime< particpantEndDate){
+                    particpantEndDate = hostObj.LeaveDateTime;
+                }
+
+
+
+
+                
+                if((hostObj.JoineDateTime < particpantEndDate) && (particpantStartDate <hostObj.LeaveDateTime)){
+                    Console.WriteLine("-----------------Participant start :" + particpantStartDate + " " + "to Participant end :" + particpantEndDate + " range is inside calling Host call duration");
+                    diff = particpantEndDate - particpantStartDate;
+                    Console.WriteLine("-------------------------Participant start :" + particpantStartDate);
+                    Console.WriteLine("-------------------------Participant end :" + particpantEndDate);
+                    Console.WriteLine("-----------------Diferrence :" + diff);
+                    actualCallDuration = actualCallDuration + diff;
+                }
+
+            }
+
+            Console.WriteLine("How many times participant joined the conference? : " + count);
+            Console.WriteLine("Actual Call Duration : " + actualCallDuration);
+
+            return new
+            {
+                Success = true,
+            };
+            
         }
         
     }

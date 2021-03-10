@@ -10,4 +10,11 @@ namespace Commander{
 
         public DateTime EndDate { get; set; }
     }
+
+    public class CallDurationHistory
+    {        
+        public TimeSpan? ConferenceDuration { get; set; }
+
+        public int ParticipantJoined { get; set; }
+    }
 }
