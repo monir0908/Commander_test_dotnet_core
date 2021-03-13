@@ -26,8 +26,11 @@ namespace Commander.Models{
 
         [MaxLength(50)]
         public string Status { get; set; }  //On-Going, Finished
+        
+        public bool HasJoinedByHost { get; set;}
+        public bool HasJoinedByParticipant { get; set;}
 
-        [MaxLength(150)]
+        [NotMapped]
         public string ConnectionId { get; set;}
 
 

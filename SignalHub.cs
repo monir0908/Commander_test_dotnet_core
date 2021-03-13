@@ -79,6 +79,8 @@ namespace Commander
                         //Step 02: Update 'Status' property on Conference Table
                         Conference confObj = _context.Conference.Where(co => co.Id == confHistoryObj.ConferenceId).Select(x=>x).FirstOrDefault();
                         confObj.Status = "Closed";
+                        confObj.HasJoinedByHost = false;
+                        confObj.HasJoinedByParticipant = false;
                         _context.SaveChanges();
 
 
@@ -128,7 +130,12 @@ namespace Commander
                     if(confHistoryObj.LeaveDateTime == null){                
                         confHistoryObj.LeaveDateTime = DateTime.UtcNow;
                         _context.SaveChanges();
-                        Console.WriteLine("I am participant and my 'LeaveDateTime' is empty, so it is updated now.");                
+                        Console.WriteLine("I am participant and my 'LeaveDateTime' is empty, so it is updated now.");
+
+
+                        Conference confObj = _context.Conference.Where(co => co.Id == confHistoryObj.ConferenceId).Select(x=>x).FirstOrDefault();
+                        confObj.HasJoinedByParticipant = false;
+                        _context.SaveChanges();                
                     }
                     else
                     {                

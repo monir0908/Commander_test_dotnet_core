@@ -173,6 +173,8 @@ namespace Commander.Services{
                     x.Participant.FirstName,
                     x.Participant.LastName,
                     IsAnyExistingConferenceBetweenThem = _context.Conference.Any(c=> c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going"),
+                    HasJoinedByHost = _context.Conference.Where(c=> c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going").OrderByDescending(c => c.Id).Select(c => c.HasJoinedByHost).FirstOrDefault(),
+                    HasJoinedByParticipant = _context.Conference.Where(c=> c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going").OrderByDescending(c => c.Id).Select(c => c.HasJoinedByParticipant).FirstOrDefault(),
                     RoomId = _context.Conference.Where(c => c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going").OrderByDescending(c => c.Id).Select(c => c.RoomId).FirstOrDefault()
 
                 }).ToListAsync();
@@ -213,6 +215,8 @@ namespace Commander.Services{
                     x.HostId,
                     x.ParticipantId,
                     x.Status,
+                    x.HasJoinedByHost,
+                    x.HasJoinedByParticipant,
                     Host = x.Host.FirstName,
                     Participant = x.Participant.FirstName,
                     x.CreatedDateTime,
@@ -258,6 +262,8 @@ namespace Commander.Services{
                     x.Host.FirstName,
                     x.Host.LastName,
                     IsAnyExistingConferenceBetweenThem = _context.Conference.Any(c => c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going"),
+                    HasJoinedByHost = _context.Conference.Where(c=> c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going").OrderByDescending(c => c.Id).Select(c => c.HasJoinedByHost).FirstOrDefault(),
+                    HasJoinedByParticipant = _context.Conference.Where(c=> c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going").OrderByDescending(c => c.Id).Select(c => c.HasJoinedByParticipant).FirstOrDefault(),
                     RoomId = _context.Conference.Where(c => c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going").OrderByDescending(c => c.Id).Select(c => c.RoomId).FirstOrDefault()
 
                 }).ToListAsync();
@@ -316,7 +322,10 @@ namespace Commander.Services{
                 
                 Helpers h = new Common.Helpers(_context);
 
-                var newlastRoomNumber = h.GenerateRoomNumber();
+                string newlastRoomNumber = h.GenerateRoomNumber();
+
+
+                //string newlastRoomNumber = CreateUniqueRoomId();
 
 
                 // string lastRoomNumber = _context.Conference.OrderByDescending(x => x.Id).Select(x => x.RoomId).FirstOrDefault();
@@ -331,6 +340,8 @@ namespace Commander.Services{
 
                 confObj.RoomId = newlastRoomNumber;
                 confObj.CreatedDateTime = DateTime.UtcNow;
+                confObj.HasJoinedByHost= false;
+                confObj.HasJoinedByParticipant = false;
                 confObj.Status = "On-Going";
                 _context.Conference.Add(confObj);
                 await _context.SaveChangesAsync();
@@ -358,36 +369,64 @@ namespace Commander.Services{
             }
         }
 
+        private string CreateUniqueRoomId()
+        {
+
+            //var roomId = _context.Conferences
+            //    .OrderBy(x=>x.Id)
+            //    .Select(x => x.RoomId)
+            //    .LastOrDefault()
+
+            var roomId = _context.Conference
+                .OrderByDescending(x => x.Id)
+                .Select(x => x.RoomId)
+                .FirstOrDefault();
+            if (roomId == null)
+            {
+                return "Room-101";
+            }
+            var roomNum = int.Parse(roomId.Remove(0, 5));
+            roomNum++;
+            return "Room-" + roomNum;
+           
+        
+        }
+
 
         public async Task<object> JoinConferenceByHost(Conference confObj)
         {
 
             try
             {                
-                var existingConf =
+                Conference existingConf =
                     _context.Conference
                     .Where(x => 
                     x.HostId == confObj.HostId && 
                     x.ParticipantId == confObj.ParticipantId && 
                     x.RoomId == confObj.RoomId && 
                     x.Status == "On-Going")
-                    .Select(x => new{
-                        x.Id,
-                        x.RoomId,
-                        x.HostId,
-                        x.ParticipantId,
-                        x.BatchId,
-                        x.Status,
-                        x.CreatedDateTime,
+                    .Select(x => x
 
-                    }).FirstOrDefault();
+                    ).FirstOrDefault();
 
                 if (existingConf != null)
                 {
 
                     // string myParticipantId = _context.Conference.Where(c=>c.HostId == confObj.HostId && c.Status == "On-Going").Select(c=> c.ParticipantId).FirstOrDefault();
+                    if(existingConf.HasJoinedByHost){
+                        return new{
+                            Success = false,
+                            Message = "You have already joined the meeting in another browser, multiple joining NOT allowed !"
 
+                        };
+                    }
 
+                    existingConf.HasJoinedByHost = true;
+                    await _context.SaveChangesAsync();
+
+                    
+
+                   
                     ConferenceHistory confHistoryObj = new ConferenceHistory();
                     confHistoryObj.ConferenceId = existingConf.Id;
                     confHistoryObj.RoomId = existingConf.RoomId;
@@ -451,6 +490,8 @@ namespace Commander.Services{
 
 
                     existingConf.Status = "Closed";
+                    existingConf.HasJoinedByHost = false;
+                    existingConf.HasJoinedByParticipant = false;
                     await _context.SaveChangesAsync();
 
 
@@ -476,6 +517,7 @@ namespace Commander.Services{
 
                     // Now, signalR comes into play
                     await _notificationHubContext.Clients.All.SendAsync("Ended", myParticipantId);
+                    await _notificationHubContext.Clients.All.SendAsync("LetHostKnowConferenceEnded", confObj.HostId); //this is needed if multiple browsers opened
 
 
                     return new
@@ -533,8 +575,26 @@ namespace Commander.Services{
                         };
                     }
 
+
+                    Conference existingConf =
+                    _context.Conference.Where(x => 
+                    x.HostId == confObj.HostId && 
+                    x.ParticipantId == confObj.ParticipantId && 
+                    x.RoomId == confObj.RoomId && 
+                    x.Status == "On-Going").Select(x => x).FirstOrDefault();
+
+                    if (existingConf != null)
+                    {
+
+                        existingConf.HasJoinedByParticipant = false;
+                        await _context.SaveChangesAsync();
+
+                    }
+
+
                     // Now, signalR comes into play
                     await _notificationHubContext.Clients.All.SendAsync("EndedByParticipant", confObj.HostId);
+                    await _notificationHubContext.Clients.All.SendAsync("LetParticipantKnowConferenceEnded", confObj.ParticipantId); // this is needed if multiple browsers opened
 
 
                     return new
@@ -643,19 +703,21 @@ namespace Commander.Services{
                     x.ParticipantId == confObj.ParticipantId && 
                     x.RoomId == confObj.RoomId && 
                     x.Status == "On-Going")
-                    .Select(x => new{
-                        x.Id,
-                        x.RoomId,
-                        x.HostId,
-                        x.ParticipantId,
-                        x.BatchId,
-                        x.Status,
-                        x.CreatedDateTime,
-
-                    }).FirstOrDefault();
+                    .Select(x => x).FirstOrDefault();
 
                 if (existingConf != null)
                 {
+                    if(existingConf.HasJoinedByParticipant){
+                        return new{
+                            Success = false,
+                            Message = "You have already joined the meeting in another browser, multiple joining NOT allowed !"
+
+                        };
+                    }
+
+                    existingConf.HasJoinedByParticipant = true;
+                    await _context.SaveChangesAsync();
+
 
                     ConferenceHistory confHistoryObj = new ConferenceHistory();
                     confHistoryObj.ConferenceId = existingConf.Id;
