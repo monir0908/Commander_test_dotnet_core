@@ -796,8 +796,20 @@ namespace Commander.Services{
         {
             Helpers h = new Helpers(_context);
 
+
+            // var univStartDate = obj.StartDate.ToUniversalTime();
+            // var univEndDate = obj.EndDate.ToUniversalTime();
+
+            var startDate = obj.StartDate;
+            var endDate = obj.EndDate.AddDays(1).AddTicks(-1);
+
+            Console.WriteLine(startDate);
+            Console.WriteLine(endDate);
+
+            
+
             var data =  await _context.ConferenceHistory
-            .Where(cs => cs.JoineDateTime >= obj.StartDate && cs.JoineDateTime <= cs.LeaveDateTime && cs.HostId !=null)
+            .Where(cs => cs.JoineDateTime >= startDate && cs.LeaveDateTime <= endDate && cs.HostId !=null)
             .Select(cs => new{
                     Id = cs.ConferenceId,
                     cs.RoomId,
@@ -808,8 +820,7 @@ namespace Commander.Services{
                     ConferenceCallDetail = h.GetEffectiveCallDurationBetweenHostAndParticipant(cs.ConferenceId),
             }).ToListAsync(); 
             
-            Console.WriteLine(obj.StartDate);
-            Console.WriteLine(obj.EndDate);
+            
 
             return new
             {
