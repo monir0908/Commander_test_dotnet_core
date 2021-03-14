@@ -30,10 +30,46 @@ namespace Commander.Services{
             return _context.Conference.Any(x => x.RoomId == roomId);
         }
 
-
         private bool IsThereAnyOnGoingMeeting(string hostId)
         {
             return _context.Conference.Any(c => c.HostId == hostId && c.Status == "On-Going");
+        }
+
+        private bool IsSameVirtualClassAleadyCreated(string roomId)
+        {
+            return _context.VClass.Any(x => x.RoomId == roomId);
+        }
+
+        private bool IsThereAnyOnGoingVirtualClass(string hostId)
+        {
+            return _context.VClass.Any(c => c.HostId == hostId && c.Status == "On-Going");
+        }
+        private bool HasHostJoinedTheVirtualClass(VClassDetail obj)
+        {
+            Console.WriteLine("Host ID: ");
+            Console.WriteLine(obj.HostId);
+
+            Console.WriteLine("Class ID: ");
+            Console.WriteLine(obj.VClassId);
+
+            Console.WriteLine("Room ID: ");
+            Console.WriteLine(obj.RoomId);
+
+            return _context.VClassDetail.Any(c => c.HostId == obj.HostId && c.VClassId == obj.VClassId && c.RoomId == obj.RoomId && c.LeaveTime == null);
+        }
+
+        private bool HasParticipantJoinedTheVirtualClass(VClassDetail obj)
+        {
+            Console.WriteLine("Host ID: ");
+            Console.WriteLine(obj.HostId);
+
+            Console.WriteLine("Class ID: ");
+            Console.WriteLine(obj.VClassId);
+
+            Console.WriteLine("Room ID: ");
+            Console.WriteLine(obj.RoomId);
+
+            return _context.VClassDetail.Any(c => c.ParticipantId == obj.ParticipantId && c.VClassId == obj.VClassId && c.RoomId == obj.RoomId && c.LeaveTime == null);
         }
 
 
@@ -856,9 +892,299 @@ namespace Commander.Services{
             
         }
         
+        //==============================================================================
+
+        public async Task<object> CreateVirtualClass(VClass vClassObj)
+        {
+            
+            try
+            {
+                bool isSameVirtualClassAleadyCreated = IsSameVirtualClassAleadyCreated(vClassObj.RoomId);
+
+                if (isSameVirtualClassAleadyCreated)
+                {
+                    return new
+                    {
+                        Success = false,
+                        Message = "A class with same name has been identified. Action Aborted ! Please contact system administrators."
+                    };
+                }
+
+                bool isThereAnyOnGoingVirtualClass = IsThereAnyOnGoingVirtualClass(vClassObj.HostId);
+
+                if (isThereAnyOnGoingVirtualClass)
+                {
+                    return new
+                    {
+                        Success = false,
+                        Message = "You have currently one existing conference. Hence, you can not start another one. You are requested to join in your previously created cnference."
+                    };
+                }
+
+
+                
+                Helpers h = new Common.Helpers(_context);
+
+                string newlastRoomNumber = h.GenerateRoomNumber();
+
+                vClassObj.RoomId = newlastRoomNumber;
+                vClassObj.CreatedDateTime = DateTime.UtcNow;
+                vClassObj.Status = "On-Going";
+                _context.VClass.Add(vClassObj);
+                await _context.SaveChangesAsync();
+
+                return new
+                {
+                    Success = true,
+                    Message = "Successfully " + Helpers.GlobalProperty +" created !"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    Success = false,
+                    ex.Message
+                };
+            }
+        }
+
+        public async Task<object> JoinVirtualClassByHost(VClassDetail vClassDetail, IEnumerable<ParticipantList> participantList)
+        {
+
+            try
+            {   
+                bool hasHostJoinedTheVirtualClass = HasHostJoinedTheVirtualClass(vClassDetail);
+                Console.WriteLine(hasHostJoinedTheVirtualClass);
+
+                if(hasHostJoinedTheVirtualClass){
+                    return new
+                    {
+                        Success = false,
+                        Message = "It seems you joined the class in another browser, multiple joining NOT allowed !"
+
+                    };
+                }
+
+                else
+                {
+
+                    vClassDetail.JoinTime = DateTime.UtcNow;
+                    _context.VClassDetail.Add(vClassDetail);
+                    await _context.SaveChangesAsync();
+
+                    
+                    foreach (var participant in participantList)
+                    {
+                        // Now, signalR comes into play
+                        await _notificationHubContext.Clients.All.SendAsync("JoinedByHost", participant.Id);
+                        
+                    }
+                    return new
+                    {
+                        Success = true,
+                        Message = "Successfully conference joined by Host !"
+                    };
+
+                }   
+
+
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    Success = false,
+                    ex.Message
+                };
+            }
+        }
+
+        public async Task<object> JoinVirtualClasByParticipant(VClassDetail vClassDetail)
+        {
+
+            try
+            {                
+                bool hasParticipantJoinedTheVirtualClass = HasParticipantJoinedTheVirtualClass(vClassDetail);
+                Console.WriteLine(hasParticipantJoinedTheVirtualClass);
+
+                if(hasParticipantJoinedTheVirtualClass){
+                    return new
+                    {
+                        Success = false,
+                        Message = "It seems you joined the class in another browser, multiple joining NOT allowed !"
+
+                    };
+                }
+
+                else
+                {
+
+                    vClassDetail.JoinTime = DateTime.UtcNow;
+                    _context.VClassDetail.Add(vClassDetail);
+                    await _context.SaveChangesAsync();
+
+                    return new
+                    {
+                        Success = true,
+                        Message = "Successfully class joined by Participant !"
+                    };
+
+                }   
+                
+
+
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    Success = false,
+                    ex.Message
+                };
+            }
+        }
+
+
+        public async Task<object> EndVirtualClassByHost(VClass vClassObj)
+        {
+
+            try
+            {
+
+
+                VClass existingConf =
+                    _context.VClass.Where(x => 
+                    x.HostId == vClassObj.HostId  && 
+                    x.RoomId == vClassObj.RoomId && 
+                    x.Status == "On-Going")
+                    .Select(x => x)
+                    .OrderByDescending(x => x.Id)
+                    .FirstOrDefault();
+                    
+
+                if (existingConf != null)
+                {
+
+                    existingConf.Status = "Closed";
+                    await _context.SaveChangesAsync();
+
+
+
+
+                    //Host LeaveTime updating
+                    VClassDetail vClassDetail = _context.VClassDetail.Where(c=> c.VClassId == existingConf.Id && c.HostId == existingConf.HostId).Select(c=> c).OrderByDescending(c => c.Id).FirstOrDefault();
+                    if(vClassDetail !=null){
+                        vClassDetail.LeaveTime = DateTime.UtcNow;
+                        await _context.SaveChangesAsync();
+                    }
+
+                    //Getting Participants and LeaveTime updating
+                    var participantVclassDetail = _context.VClassDetail.Where(c=> c.VClassId == existingConf.Id && c.ParticipantId !=null && c.LeaveTime ==null).Select(c=> c).ToList();
+
+                    
+                    if(participantVclassDetail.Count() >0){
+                        foreach (var obj in participantVclassDetail)
+                        {
+                            obj.LeaveTime = DateTime.UtcNow;
+                            await _context.SaveChangesAsync();
+
+                            // Now, signalR comes into play
+                            await _notificationHubContext.Clients.All.SendAsync("EndedByHost", obj.ParticipantId);
+                            
+                        }
+                    }
+
+                    // Now, signalR comes into play
+                    await _notificationHubContext.Clients.All.SendAsync("LetHostKnowClassEnded", vClassObj.HostId); //this is needed if multiple browsers opened
+
+
+                    return new
+                    {
+                        Success = true,
+                        Message = "Successfully class ended !"
+                    };
+                }
+
+                return new
+                {
+                    Success = false,
+                    Message = "No on-going class found !"
+                };
+
+                
+
+
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    Success = false,
+                    ex.Message
+                };
+            }
+        }
+
+        public async Task<object> EndVirtualClassByParticipant(VClassDetail vClassDetail)
+        {
+            try
+            {
+
+
+                    VClassDetail detailObj = 
+                    _context.VClassDetail
+                    .Where(c=> c.VClassId == vClassDetail.Id && c.ParticipantId == vClassDetail.ParticipantId)
+                    .Select(c=> c)
+                    .OrderByDescending(c => c.Id)
+                    .FirstOrDefault();
+                    
+
+                    if(detailObj !=null && detailObj.LeaveTime == null){
+                        detailObj.LeaveTime = DateTime.UtcNow;
+                        await _context.SaveChangesAsync();
+
+                    }
+                    else{
+                        return new
+                        {
+                            Success = false,
+                            Message = "The virtual class has already been ended. We found 'LeaveTime' is already set."
+                        };
+                    }                    
+
+
+                    // Now, signalR comes into play
+                    // This is needed if multiple browsers opened by this participant
+                    await _notificationHubContext.Clients.All.SendAsync("LetParticipantKnowClassEnded", vClassDetail.ParticipantId); 
+
+
+                    return new
+                    {
+                        Success = true,
+                        Message = "Successfully class ended !"
+                    };
+
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    Success = false,
+                    ex.Message
+                };
+            }
+        }
+
 
         public async Task<object> TestApi()
         {
+
+
+            
+
+
+
 
             await _context.Command.Select(c => c).ToListAsync();
 

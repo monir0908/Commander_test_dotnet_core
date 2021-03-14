@@ -27,10 +27,18 @@ namespace Commander.Services{
         Task<object> JoinConferenceByParticipant(Conference confObj);
         Task<object> EndConference(Conference confObj);
         Task<object> EndConferenceByParticipant(Conference confObj);
-        Task<object> GetConferenceList();
-        Task<object> TestApi();
+        Task<object> GetConferenceList();        
         Task<object> GetCallingHistoryByDaterange(DateTimeParams obj);
         Task<object> GetConferenceHistoryDetailById(long confId);
+
+
+
+        Task<object> CreateVirtualClass(VClass vClassObj);
+        Task<object> JoinVirtualClassByHost(VClassDetail vClassDetail, IEnumerable<ParticipantList> participantList);
+        Task<object> JoinVirtualClasByParticipant(VClassDetail vClassDetail);
+        Task<object> EndVirtualClassByHost(VClass vClassObj);
+        Task<object> EndVirtualClassByParticipant(VClassDetail vClassDetail);
+        Task<object> TestApi();
 
     }
 }

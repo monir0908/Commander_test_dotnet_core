@@ -3,6 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Commander.Services;
 using Commander.Models;
+using System.Collections.Generic;
+using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace Commander.Controllers
 {
@@ -125,6 +128,51 @@ namespace Commander.Controllers
         public async Task<IActionResult> GetConferenceHistoryDetailById(long confId)
         {
             return Ok(await _services.GetConferenceHistoryDetailById(confId));
+        }
+
+
+
+
+
+
+
+
+        [HttpPost, Route("CreateVirtualClass")]
+        public async Task<IActionResult> CreateVirtualClass(VClass vClassObj)
+        {
+            return Ok(await _services.CreateVirtualClass(vClassObj));
+        }
+
+        [HttpPost, Route("JoinVirtualClassByHost")]
+        public async Task<IActionResult> JoinVirtualClassByHost(JObject objData)
+        {
+
+            dynamic jsonData = objData;
+            JObject vClassDetailJson = jsonData.vClassDetail;
+            var vClassDetail = vClassDetailJson.ToObject<VClassDetail>();
+
+            JArray participantListJson = jsonData.participantList;
+            var participantList = participantListJson.Select(item => item.ToObject<ParticipantList>()).ToList();
+            return Ok(await _services.JoinVirtualClassByHost(vClassDetail, participantList));
+        }
+
+        [HttpPost, Route("JoinVirtualClasByParticipant")]
+        public async Task<IActionResult> JoinVirtualClasByParticipant(VClassDetail vClassDetail)
+        {
+            return Ok(await _services.JoinVirtualClasByParticipant(vClassDetail));
+        }
+        
+
+        [HttpPost, Route("EndVirtualClassByHost")]
+        public async Task<IActionResult> EndVirtualClassByHost(VClass vClassObj)
+        {
+            return Ok(await _services.EndVirtualClassByHost(vClassObj));
+        }
+
+        [HttpPost, Route("EndVirtualClassByParticipant")]
+        public async Task<IActionResult> EndVirtualClassByParticipant(VClassDetail vClassDetail)
+        {
+            return Ok(await _services.EndVirtualClassByParticipant(vClassDetail));
         }
 
 

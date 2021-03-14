@@ -7,6 +7,8 @@ using Commander.Models;
 namespace Commander.Common{
     public class Helpers
     {
+
+        public static string GlobalProperty = "Class";
         
         private readonly ApplicationDbContext _context;  
  

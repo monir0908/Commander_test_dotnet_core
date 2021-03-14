@@ -17,4 +17,10 @@ namespace Commander{
 
         public int ParticipantJoined { get; set; }
     }
+
+    public class ParticipantList
+    {        
+
+        public string Id{ get; set; }
+    }
 }

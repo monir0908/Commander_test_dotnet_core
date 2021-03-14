@@ -63,6 +63,11 @@ namespace Commander.Models
         public DbSet<Conference> Conference{ get; set; }
         public DbSet<ConferenceHistory> ConferenceHistory { get; set; }
         public DbSet<Command> Command { get; set; }
+
+        public DbSet<VClass> VClass{ get; set; }
+        public DbSet<VClassDetail> VClassDetail { get; set; }
+
+
         #endregion
 
         
