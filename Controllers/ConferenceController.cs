@@ -175,6 +175,18 @@ namespace Commander.Controllers
             return Ok(await _services.EndVirtualClassByParticipant(vClassDetail));
         }
 
+        [HttpGet, Route("GetVirtualClassCallingHistoryByDaterange")]
+        public async Task<IActionResult> GetVirtualClassCallingHistoryByDaterange(DateTimeParams obj)
+        {
+            return Ok(await _services.GetVirtualClassCallingHistoryByDaterange(obj));
+        }
+
+        [HttpGet, Route("GetVirtualClassDetailById/{vclassId}")]
+        public async Task<IActionResult> GetVirtualClassDetailById(long vclassId)
+        {
+            return Ok(await _services.GetVirtualClassDetailById(vclassId));
+        }
+
 
     }
 }

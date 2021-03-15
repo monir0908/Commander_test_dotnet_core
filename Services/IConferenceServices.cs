@@ -38,6 +38,8 @@ namespace Commander.Services{
         Task<object> JoinVirtualClasByParticipant(VClassDetail vClassDetail);
         Task<object> EndVirtualClassByHost(VClass vClassObj);
         Task<object> EndVirtualClassByParticipant(VClassDetail vClassDetail);
+        Task<object> GetVirtualClassCallingHistoryByDaterange(DateTimeParams obj);
+        Task<object> GetVirtualClassDetailById(long vclassId);
         Task<object> TestApi();
 
     }

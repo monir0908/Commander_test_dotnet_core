@@ -925,7 +925,7 @@ namespace Commander.Services{
                 
                 Helpers h = new Common.Helpers(_context);
 
-                string newlastRoomNumber = h.GenerateRoomNumber();
+                string newlastRoomNumber = h.GenerateVirtualClassRoomNumber();
 
                 vClassObj.RoomId = newlastRoomNumber;
                 vClassObj.CreatedDateTime = DateTime.UtcNow;
@@ -1176,7 +1176,67 @@ namespace Commander.Services{
             }
         }
 
+        public async Task<object> GetVirtualClassCallingHistoryByDaterange(DateTimeParams obj)
+        {
+            Helpers h = new Helpers(_context);
+            
 
+            var startDate = obj.StartDate;
+            var endDate = obj.EndDate.AddDays(1).AddTicks(-1);
+
+            Console.WriteLine(startDate);
+            Console.WriteLine(endDate);
+
+            
+
+            var data =  await _context.VClassDetail
+            .Where(cs => cs.JoinTime >= startDate && cs.LeaveTime <= endDate && cs.HostId !=null)
+            .Select(cs => new{
+                    Id = cs.VClassId,
+                    cs.RoomId,
+                    cs.HostId,
+                    HostFirstName = cs.Host.FirstName,
+                    // cs.ParticipantId,
+                    // ParticipantFirstName = cs.Participant.FirstName,
+                    ConferenceCallDetail = h.GetActualCallDurationBetweenHostAndParticipant(cs.VClassId),
+            }).ToListAsync(); 
+            
+            
+
+            return new
+            {
+                Success = true,
+                Records = data
+            };
+            
+        }
+
+        public async Task<object> GetVirtualClassDetailById(long vclassId)
+        {
+
+            Helpers h = new Helpers(_context);
+
+            var data =  await _context.VClassDetail
+            .Where(cs => cs.VClassId == vclassId)
+            .Select(cs => new{
+                    Id = cs.VClassId,
+                    cs.RoomId,
+                    cs.HostId,
+                    HostFirstName = cs.Host.FirstName,
+                    cs.ParticipantId,
+                    ParticipantFirstName = cs.Participant.FirstName,
+                    cs.JoinTime,
+                    cs.LeaveTime
+            }).ToListAsync(); 
+
+            return new
+            {
+                Success = true,
+                Records = data
+            };
+            
+        }
+        
         public async Task<object> TestApi()
         {
 
