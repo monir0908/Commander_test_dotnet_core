@@ -1321,65 +1321,158 @@ namespace Commander.Services{
             //=======================================================
             // TimeSpan result = new TimeSpan();  
 
-            var confHistoryObj = _context.ConferenceHistory
-            .Where(cs => cs.ConferenceId == 305)
-            .Select(cs => new{
-                cs.ConferenceId,
-                cs.HostId,
-                cs.ParticipantId,
-                cs.RoomId,
-                cs.JoineDateTime,
-                cs.LeaveDateTime
-            }).ToList();
+            // var confHistoryObj = _context.ConferenceHistory
+            // .Where(cs => cs.ConferenceId == 305)
+            // .Select(cs => new{
+            //     cs.ConferenceId,
+            //     cs.HostId,
+            //     cs.ParticipantId,
+            //     cs.RoomId,
+            //     cs.JoineDateTime,
+            //     cs.LeaveDateTime
+            // }).ToList();
 
-            var hostObj = confHistoryObj
-            .Where(cs => cs.HostId !=null)
-            .Select(cs => cs)
-            .FirstOrDefault();
+            // var hostObj = confHistoryObj
+            // .Where(cs => cs.HostId !=null)
+            // .Select(cs => cs)
+            // .FirstOrDefault();
 
-            var participantObjs = confHistoryObj
-            .Where(cs => cs.ParticipantId !=null)
-            .Select(cs => cs)
-            .ToList();
+            // var participantObjs = confHistoryObj
+            // .Where(cs => cs.ParticipantId !=null)
+            // .Select(cs => cs)
+            // .ToList();
 
-            //(StartDate1 <= EndDate2) and (StartDate2 <= EndDate1)
-            int count = 0;
-            TimeSpan? diff;
-            TimeSpan? actualCallDuration = new TimeSpan(0,0,0);
+            // //(StartDate1 <= EndDate2) and (StartDate2 <= EndDate1)
+            // int count = 0;
+            // TimeSpan? diff;
+            // TimeSpan? actualCallDuration = new TimeSpan(0,0,0);
 
-            foreach(var i in participantObjs){
+            // foreach(var i in participantObjs){
 
-                count = count + 1;
+            //     count = count + 1;
 
-                var particpantStartDate = i.JoineDateTime;
-                var particpantEndDate = i.LeaveDateTime;
+            //     var particpantStartDate = i.JoineDateTime;
+            //     var particpantEndDate = i.LeaveDateTime;
 
 
-                //Note: in case, participant joins in earlier than host and leaves later than host.
-                if(hostObj.JoineDateTime> particpantStartDate){
-                    particpantStartDate = hostObj.JoineDateTime;
-                }
-                if(hostObj.LeaveDateTime< particpantEndDate){
-                    particpantEndDate = hostObj.LeaveDateTime;
-                }
+            //     //Note: in case, participant joins in earlier than host and leaves later than host.
+            //     if(hostObj.JoineDateTime> particpantStartDate){
+            //         particpantStartDate = hostObj.JoineDateTime;
+            //     }
+            //     if(hostObj.LeaveDateTime< particpantEndDate){
+            //         particpantEndDate = hostObj.LeaveDateTime;
+            //     }
 
 
 
 
                 
-                if((hostObj.JoineDateTime < particpantEndDate) && (particpantStartDate <hostObj.LeaveDateTime)){
-                    Console.WriteLine("-----------------Participant start :" + particpantStartDate + " " + "to Participant end :" + particpantEndDate + " range is inside calling Host call duration");
-                    diff = particpantEndDate - particpantStartDate;
-                    Console.WriteLine("-------------------------Participant start :" + particpantStartDate);
-                    Console.WriteLine("-------------------------Participant end :" + particpantEndDate);
-                    Console.WriteLine("-----------------Diferrence :" + diff);
-                    actualCallDuration = actualCallDuration + diff;
-                }
+            //     if((hostObj.JoineDateTime < particpantEndDate) && (particpantStartDate <hostObj.LeaveDateTime)){
+            //         Console.WriteLine("-----------------Participant start :" + particpantStartDate + " " + "to Participant end :" + particpantEndDate + " range is inside calling Host call duration");
+            //         diff = particpantEndDate - particpantStartDate;
+            //         Console.WriteLine("-------------------------Participant start :" + particpantStartDate);
+            //         Console.WriteLine("-------------------------Participant end :" + particpantEndDate);
+            //         Console.WriteLine("-----------------Diferrence :" + diff);
+            //         actualCallDuration = actualCallDuration + diff;
+            //     }
 
+            // }
+
+            // Console.WriteLine("How many times participant joined the conference? : " + count);
+            // Console.WriteLine("Actual Call Duration : " + actualCallDuration);
+
+            // List<DateTime> allDates = new List<DateTime>();
+            // DateTime startingDate = new DateTime(2021, 03, 11, 13, 15, 00);
+            // DateTime endingDate = new DateTime(2021, 03, 15, 13, 15, 00);
+
+            // for (DateTime date = startingDate; date <= endingDate; date = date.AddDays(1))
+            //     allDates.Add(date);
+
+            // foreach (var item in allDates)
+            // {
+            //     Console.WriteLine(item);
+            // }
+
+            var dates = _context.VClassDetail.Where(c => c.Participant != null && c.RoomId == "Room-101")
+            .Select(c => new{
+                c.JoinTime,
+                c.LeaveTime
+
+            }).OrderBy(c => c.JoinTime).ThenBy(c => c.LeaveTime).ToList();
+
+            foreach (var item in dates)
+            {
+                Console.WriteLine(item);
             }
 
-            Console.WriteLine("How many times participant joined the conference? : " + count);
-            Console.WriteLine("Actual Call Duration : " + actualCallDuration);
+          
+            
+
+            //if((hostObj.JoineDateTime < particpantEndDate) && (particpantStartDate <hostObj.LeaveDateTime))
+            // foreach (var item in dates)
+            // {
+
+            //     DateTime outsiderJoinTime = item.JoinTime??new DateTime();
+            //     DateTime outsiderLeaveTime = item.LeaveTime??new DateTime();
+            //     foreach (var inner in dates)
+            //     {
+            //         if((outsiderJoinTime <= inner.LeaveTime) && (inner.JoinTime <=outsiderLeaveTime)){
+            //             Console.WriteLine("-------------");
+            //             // Console.WriteLine(outsiderJoinTime + " " + "to  " + outsiderLeaveTime + " range matches");
+            //             // Console.WriteLine(inner.JoinTime + " " + "to  " + inner.LeaveTime );
+            //             tempStart = outsiderJoinTime;
+            //             tempEnd = inner.LeaveTime??new DateTime();
+
+            //             Console.WriteLine("temp start" + tempStart);
+            //             Console.WriteLine("temp end" + tempEnd);
+
+
+            //         }
+            //     }
+            // }
+
+            DateTime tempStart = dates[0].JoinTime??new DateTime();
+            DateTime tempEnd = dates[0].LeaveTime??new DateTime();
+
+            TimeSpan? diff; 
+            TimeSpan? actualCallDuration = new TimeSpan(0,0,0);
+
+            foreach (var item in dates)
+            {
+                DateTime loopStart = item.JoinTime?? new DateTime();
+                DateTime loopEnd = item.LeaveTime?? new DateTime();
+
+
+                if((tempStart <= loopEnd) && (loopStart <=tempEnd)){
+                    Console.WriteLine("-------------");
+                    // Console.WriteLine(outsiderJoinTime + " " + "to  " + outsiderLeaveTime + " range matches");
+                    // Console.WriteLine(inner.JoinTime + " " + "to  " + inner.LeaveTime );
+                    
+                    tempEnd = loopEnd;
+
+                    Console.WriteLine("temp start : " + tempStart);
+                    Console.WriteLine("temp end  : " + tempEnd);
+
+
+                }
+                else{
+
+                    diff = loopStart - tempEnd;
+                    Console.WriteLine("diff : " + diff );
+                                        
+                    tempStart = loopStart;
+                    tempEnd = loopEnd;
+
+                    
+
+                    actualCallDuration = actualCallDuration + diff;
+                    
+
+                }
+                Console.WriteLine("actualCallDuration : " + actualCallDuration );   
+            }
+
+
 
             return new
             {
