@@ -894,6 +894,80 @@ namespace Commander.Services{
         
         //==============================================================================
 
+
+        public async Task<object> GetParticipantListByBatchAndHostId(long batchId, string hostId)
+        {
+
+
+            try
+            {
+                var query = _context.BatchHostParticipant.Where(x => x.BatchId == batchId && x.HostId == hostId).AsQueryable();
+                var data = await query.OrderByDescending(x => x.Id).Select(x => new
+                {
+                    x.ParticipantId,
+                    x.Participant.FirstName,
+                    x.Participant.LastName,
+                    
+                }).ToListAsync();
+
+
+                var count = await query.CountAsync();
+
+                return new
+                {
+                    Success = true,
+                    Records = data,
+                    Total = count
+                };
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    Success = false,
+                    Message = ex.InnerException != null ? ex.InnerException.InnerException?.Message ?? ex.InnerException.Message : ex.Message
+                };
+            }
+
+        }
+
+        public async Task<object> GetCurrentOnGoingVirtualClassListByHostId(string hostId){
+            try
+            {
+                var query = _context.VClass.Where(x => x.Status == "On-Going").AsQueryable();
+                var data = await query.OrderByDescending(x => x.Id)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.RoomId,
+                    x.HostId,
+                    x.BatchId,
+                    x.Batch.BatchName,                    
+                    x.Status,
+                    HasJoinedByHost = _context.VClassDetail.Any(c => c.HostId == x.HostId && c.VClassId == x.Id && c.RoomId == x.RoomId && c.LeaveTime == null),
+
+                }).ToListAsync();
+
+                var count = await query.CountAsync();               
+
+
+                return new
+                {
+                    Success = true,
+                    Records = data,
+                    Total = count
+                };
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    Success = false,
+                    Message = ex.InnerException != null ? ex.InnerException.InnerException?.Message ?? ex.InnerException.Message : ex.Message
+                };
+            }
+        }
+
         public async Task<object> CreateVirtualClass(VClass vClassObj)
         {
             
@@ -936,6 +1010,7 @@ namespace Commander.Services{
                 return new
                 {
                     Success = true,
+                    Records = vClassObj,
                     Message = "Successfully " + Helpers.GlobalProperty +" created !"
                 };
             }
@@ -949,6 +1024,7 @@ namespace Commander.Services{
             }
         }
 
+        
         public async Task<object> JoinVirtualClassByHost(VClassDetail vClassDetail, IEnumerable<ParticipantList> participantList)
         {
 
@@ -983,6 +1059,7 @@ namespace Commander.Services{
                     return new
                     {
                         Success = true,
+                        Records = vClassDetail,
                         Message = "Successfully conference joined by Host !"
                     };
 
@@ -1054,7 +1131,8 @@ namespace Commander.Services{
 
 
                 VClass existingConf =
-                    _context.VClass.Where(x => 
+                    _context.VClass.Where(x =>
+                    x.Id == vClassObj.Id && 
                     x.HostId == vClassObj.HostId  && 
                     x.RoomId == vClassObj.RoomId && 
                     x.Status == "On-Going")
@@ -1065,12 +1143,6 @@ namespace Commander.Services{
 
                 if (existingConf != null)
                 {
-
-                    existingConf.Status = "Closed";
-                    await _context.SaveChangesAsync();
-
-
-
 
                     //Host LeaveTime updating
                     VClassDetail vClassDetail = _context.VClassDetail.Where(c=> c.VClassId == existingConf.Id && c.HostId == existingConf.HostId).Select(c=> c).OrderByDescending(c => c.Id).FirstOrDefault();
@@ -1098,6 +1170,18 @@ namespace Commander.Services{
                     // Now, signalR comes into play
                     await _notificationHubContext.Clients.All.SendAsync("LetHostKnowClassEnded", vClassObj.HostId); //this is needed if multiple browsers opened
 
+                    // Now, update 'VClass' table with call-details
+                    Helpers h = new Helpers(_context);
+                    var res = h.GetActualCallDurationBetweenHostAndParticipant(vClassObj.Id);
+                    existingConf.Status = "Closed";
+
+                    existingConf.HostCallDuration = res.HostCallDuration;
+                    existingConf.ParticipantsCallDuration = res.ParticipantsCallDuration;
+                    existingConf.EmptySlotDuration = res.EmptySlotDuration;
+                    existingConf.ActualCallDuration = res.ActualCallDuration;
+                    existingConf.ParticipantJoined = res.ParticipantJoined;
+                    existingConf.UniqueParticipantCounts = res.UniqueParticipantCounts;
+                    await _context.SaveChangesAsync();
 
                     return new
                     {
@@ -1216,17 +1300,19 @@ namespace Commander.Services{
 
             Helpers h = new Helpers(_context);
 
-            var data =  await _context.VClassDetail
-            .Where(cs => cs.VClassId == vclassId)
+            var data =  await _context.VClass
+            .Where(cs => cs.Id == vclassId)
             .Select(cs => new{
-                    Id = cs.VClassId,
+                    cs.Id,
                     cs.RoomId,
                     cs.HostId,
                     HostFirstName = cs.Host.FirstName,
-                    cs.ParticipantId,
-                    ParticipantFirstName = cs.Participant.FirstName,
-                    cs.JoinTime,
-                    cs.LeaveTime
+                    cs.HostCallDuration,
+                    cs.ParticipantsCallDuration,
+                    cs.EmptySlotDuration,
+                    cs.ActualCallDuration,
+                    cs.ParticipantJoined,
+                    cs.UniqueParticipantCounts,
             }).ToListAsync(); 
 
             return new
@@ -1239,11 +1325,6 @@ namespace Commander.Services{
         
         public async Task<object> TestApi()
         {
-
-
-            
-
-
 
 
             await _context.Command.Select(c => c).ToListAsync();
@@ -1315,163 +1396,6 @@ namespace Commander.Services{
 
             // TimeSpan diff = participantEnd - participantStart;
             // Console.WriteLine(diff);
-
-
-
-            //=======================================================
-            // TimeSpan result = new TimeSpan();  
-
-            // var confHistoryObj = _context.ConferenceHistory
-            // .Where(cs => cs.ConferenceId == 305)
-            // .Select(cs => new{
-            //     cs.ConferenceId,
-            //     cs.HostId,
-            //     cs.ParticipantId,
-            //     cs.RoomId,
-            //     cs.JoineDateTime,
-            //     cs.LeaveDateTime
-            // }).ToList();
-
-            // var hostObj = confHistoryObj
-            // .Where(cs => cs.HostId !=null)
-            // .Select(cs => cs)
-            // .FirstOrDefault();
-
-            // var participantObjs = confHistoryObj
-            // .Where(cs => cs.ParticipantId !=null)
-            // .Select(cs => cs)
-            // .ToList();
-
-            // //(StartDate1 <= EndDate2) and (StartDate2 <= EndDate1)
-            // int count = 0;
-            // TimeSpan? diff;
-            // TimeSpan? actualCallDuration = new TimeSpan(0,0,0);
-
-            // foreach(var i in participantObjs){
-
-            //     count = count + 1;
-
-            //     var particpantStartDate = i.JoineDateTime;
-            //     var particpantEndDate = i.LeaveDateTime;
-
-
-            //     //Note: in case, participant joins in earlier than host and leaves later than host.
-            //     if(hostObj.JoineDateTime> particpantStartDate){
-            //         particpantStartDate = hostObj.JoineDateTime;
-            //     }
-            //     if(hostObj.LeaveDateTime< particpantEndDate){
-            //         particpantEndDate = hostObj.LeaveDateTime;
-            //     }
-
-
-
-
-                
-            //     if((hostObj.JoineDateTime < particpantEndDate) && (particpantStartDate <hostObj.LeaveDateTime)){
-            //         Console.WriteLine("-----------------Participant start :" + particpantStartDate + " " + "to Participant end :" + particpantEndDate + " range is inside calling Host call duration");
-            //         diff = particpantEndDate - particpantStartDate;
-            //         Console.WriteLine("-------------------------Participant start :" + particpantStartDate);
-            //         Console.WriteLine("-------------------------Participant end :" + particpantEndDate);
-            //         Console.WriteLine("-----------------Diferrence :" + diff);
-            //         actualCallDuration = actualCallDuration + diff;
-            //     }
-
-            // }
-
-            // Console.WriteLine("How many times participant joined the conference? : " + count);
-            // Console.WriteLine("Actual Call Duration : " + actualCallDuration);
-
-            // List<DateTime> allDates = new List<DateTime>();
-            // DateTime startingDate = new DateTime(2021, 03, 11, 13, 15, 00);
-            // DateTime endingDate = new DateTime(2021, 03, 15, 13, 15, 00);
-
-            // for (DateTime date = startingDate; date <= endingDate; date = date.AddDays(1))
-            //     allDates.Add(date);
-
-            // foreach (var item in allDates)
-            // {
-            //     Console.WriteLine(item);
-            // }
-
-            var dates = _context.VClassDetail.Where(c => c.Participant != null && c.RoomId == "Room-101")
-            .Select(c => new{
-                c.JoinTime,
-                c.LeaveTime
-
-            }).OrderBy(c => c.JoinTime).ThenBy(c => c.LeaveTime).ToList();
-
-            foreach (var item in dates)
-            {
-                Console.WriteLine(item);
-            }
-
-          
-            
-
-            //if((hostObj.JoineDateTime < particpantEndDate) && (particpantStartDate <hostObj.LeaveDateTime))
-            // foreach (var item in dates)
-            // {
-
-            //     DateTime outsiderJoinTime = item.JoinTime??new DateTime();
-            //     DateTime outsiderLeaveTime = item.LeaveTime??new DateTime();
-            //     foreach (var inner in dates)
-            //     {
-            //         if((outsiderJoinTime <= inner.LeaveTime) && (inner.JoinTime <=outsiderLeaveTime)){
-            //             Console.WriteLine("-------------");
-            //             // Console.WriteLine(outsiderJoinTime + " " + "to  " + outsiderLeaveTime + " range matches");
-            //             // Console.WriteLine(inner.JoinTime + " " + "to  " + inner.LeaveTime );
-            //             tempStart = outsiderJoinTime;
-            //             tempEnd = inner.LeaveTime??new DateTime();
-
-            //             Console.WriteLine("temp start" + tempStart);
-            //             Console.WriteLine("temp end" + tempEnd);
-
-
-            //         }
-            //     }
-            // }
-
-            DateTime tempStart = dates[0].JoinTime??new DateTime();
-            DateTime tempEnd = dates[0].LeaveTime??new DateTime();
-
-            TimeSpan? diff; 
-            TimeSpan? actualCallDuration = new TimeSpan(0,0,0);
-
-            foreach (var item in dates)
-            {
-                DateTime loopStart = item.JoinTime?? new DateTime();
-                DateTime loopEnd = item.LeaveTime?? new DateTime();
-
-
-                if((tempStart <= loopEnd) && (loopStart <=tempEnd)){
-                    Console.WriteLine("-------------");
-                    // Console.WriteLine(outsiderJoinTime + " " + "to  " + outsiderLeaveTime + " range matches");
-                    // Console.WriteLine(inner.JoinTime + " " + "to  " + inner.LeaveTime );
-                    
-                    tempEnd = loopEnd;
-
-                    Console.WriteLine("temp start : " + tempStart);
-                    Console.WriteLine("temp end  : " + tempEnd);
-
-
-                }
-                else{
-
-                    diff = loopStart - tempEnd;
-                    Console.WriteLine("diff : " + diff );
-                                        
-                    tempStart = loopStart;
-                    tempEnd = loopEnd;
-
-                    
-
-                    actualCallDuration = actualCallDuration + diff;
-                    
-
-                }
-                Console.WriteLine("actualCallDuration : " + actualCallDuration );   
-            }
-
 
 
             return new

@@ -28,6 +28,14 @@ namespace Commander.Models{
         [NotMapped]
         public string ConnectionId { get; set;}
 
+        public TimeSpan? HostCallDuration {get;set;}
+        public TimeSpan? ParticipantsCallDuration {get;set;}
+        public TimeSpan? EmptySlotDuration {get;set;}
+        public TimeSpan? ActualCallDuration {get;set;}
+        public int ParticipantJoined {get;set;}
+        public int UniqueParticipantCounts {get;set;}
+
+
 
     }
 }

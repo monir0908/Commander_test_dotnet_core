@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json;
 using Commander.Models;
 using Commander.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json.Serialization;
 
 namespace Commander
 {
@@ -27,7 +29,11 @@ namespace Commander
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers()
-                    .AddNewtonsoftJson();
+                    // need to add the following as JObject is used in controller                    
+                    .AddNewtonsoftJson(options =>
+                    {
+                        options.UseMemberCasing(); // Important for camel casing !
+                    });
 
             services.AddDbContextPool<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("Cn")));

@@ -33,6 +33,9 @@ namespace Commander.Services{
 
 
 
+
+        Task<object> GetParticipantListByBatchAndHostId(long batchId, string hostId);
+        Task<object> GetCurrentOnGoingVirtualClassListByHostId(string hostId);
         Task<object> CreateVirtualClass(VClass vClassObj);
         Task<object> JoinVirtualClassByHost(VClassDetail vClassDetail, IEnumerable<ParticipantList> participantList);
         Task<object> JoinVirtualClasByParticipant(VClassDetail vClassDetail);

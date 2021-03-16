@@ -135,7 +135,17 @@ namespace Commander.Controllers
 
 
 
+        [HttpGet, Route("GetParticipantListByBatchAndHostId/{batchId:long}/{hostId}")]
+        public async Task<IActionResult> GetParticipantListByBatchAndHostId(long batchId, string hostId)
+        {
+            return Ok(await _services.GetParticipantListByBatchAndHostId(batchId, hostId));
+        }
 
+        [HttpGet, Route("GetCurrentOnGoingVirtualClassListByHostId/{hostId}")]
+        public async Task<IActionResult> GetCurrentOnGoingVirtualClassListByHostId(string hostId)
+        {
+            return Ok(await _services.GetCurrentOnGoingVirtualClassListByHostId(hostId));
+        }
 
         [HttpPost, Route("CreateVirtualClass")]
         public async Task<IActionResult> CreateVirtualClass(VClass vClassObj)
