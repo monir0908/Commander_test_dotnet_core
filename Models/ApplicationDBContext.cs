@@ -65,6 +65,7 @@ namespace Commander.Models
         public DbSet<Command> Command { get; set; }
 
         public DbSet<VClass> VClass{ get; set; }
+        public DbSet<VClassInvitation> VClassInvitation{ get; set; }
         public DbSet<VClassDetail> VClassDetail { get; set; }
 
 
