@@ -71,8 +71,36 @@ namespace Commander.Services{
 
             return _context.VClassDetail.Any(c => c.ParticipantId == obj.ParticipantId && c.VClassId == obj.VClassId && c.RoomId == obj.RoomId && c.LeaveTime == null);
         }
+        private void SendInvitationForVirtualClass(VClassDetail vClassDetail, IEnumerable<ParticipantList> participantList)
+        {
+            
+            foreach (var item in participantList)
+            {
+                VClassInvitation viObj = new VClassInvitation();
+                viObj.VClassId = vClassDetail.VClassId;
+                viObj.RoomId = vClassDetail.RoomId ;
+                viObj.BatchId = vClassDetail.BatchId ;
+                viObj.HostId = vClassDetail.HostId ;
+                viObj.InvitationDateTime = DateTime.UtcNow;
+                viObj.Status = "Invited";
+                viObj.ParticipantId = item.Id;
 
+                _context.VClassInvitation.Add(viObj);
+                _context.SaveChanges();
+            }
+            return;
+            
+        }
 
+        private void RemoveInvitationList(long vClassId)
+        {
+            
+            _context.VClassInvitation.RemoveRange(_context.VClassInvitation.Where(x => x.VClassId == vClassId));
+            _context.SaveChanges();   
+            return;
+            
+        }
+        
 
 
         // Host Side
@@ -324,8 +352,6 @@ namespace Commander.Services{
             }
 
         }
-
-
 
         public async Task<object> CreateConference(Conference confObj)
         {
@@ -1023,7 +1049,6 @@ namespace Commander.Services{
                 };
             }
         }
-
         
         public async Task<object> JoinVirtualClassByHost(VClassDetail vClassDetail, IEnumerable<ParticipantList> participantList)
         {
@@ -1056,6 +1081,8 @@ namespace Commander.Services{
                         await _notificationHubContext.Clients.All.SendAsync("JoinedByHost", participant.Id);
                         
                     }
+
+                    SendInvitationForVirtualClass(vClassDetail, participantList);
                     return new
                     {
                         Success = true,
@@ -1122,14 +1149,11 @@ namespace Commander.Services{
             }
         }
 
-
         public async Task<object> EndVirtualClassByHost(VClass vClassObj)
         {
 
             try
             {
-
-
                 VClass existingConf =
                     _context.VClass.Where(x =>
                     x.Id == vClassObj.Id && 
@@ -1138,8 +1162,7 @@ namespace Commander.Services{
                     x.Status == "On-Going")
                     .Select(x => x)
                     .OrderByDescending(x => x.Id)
-                    .FirstOrDefault();
-                    
+                    .FirstOrDefault();                    
 
                 if (existingConf != null)
                 {
@@ -1152,11 +1175,11 @@ namespace Commander.Services{
                     }
 
                     //Getting Participants and LeaveTime updating
-                    var participantVclassDetail = _context.VClassDetail.Where(c=> c.VClassId == existingConf.Id && c.ParticipantId !=null && c.LeaveTime ==null).Select(c=> c).ToList();
+                    var participantList = _context.VClassDetail.Where(c=> c.VClassId == existingConf.Id && c.ParticipantId !=null && c.LeaveTime ==null).Select(c=> c).ToList();
 
                     
-                    if(participantVclassDetail.Count() >0){
-                        foreach (var obj in participantVclassDetail)
+                    if(participantList.Count() >0){
+                        foreach (var obj in participantList)
                         {
                             obj.LeaveTime = DateTime.UtcNow;
                             await _context.SaveChangesAsync();
@@ -1164,8 +1187,13 @@ namespace Commander.Services{
                             // Now, signalR comes into play
                             await _notificationHubContext.Clients.All.SendAsync("EndedByHost", obj.ParticipantId);
                             
-                        }
+                        }                       
+                        
                     }
+
+                    // Removing all invitation
+
+                    RemoveInvitationList(vClassDetail.VClassId);
 
                     // Now, signalR comes into play
                     await _notificationHubContext.Clients.All.SendAsync("LetHostKnowClassEnded", vClassObj.HostId); //this is needed if multiple browsers opened
@@ -1194,10 +1222,7 @@ namespace Commander.Services{
                 {
                     Success = false,
                     Message = "No on-going class found !"
-                };
-
-                
-
+                };         
 
             }
             catch (Exception ex)
@@ -1329,78 +1354,16 @@ namespace Commander.Services{
 
             await _context.Command.Select(c => c).ToListAsync();
 
-            //=======================================================
+            var participantList =   _context.VClassDetail.Where(c=> c.VClassId == 1 && c.ParticipantId !=null).Select(c=> c).ToList();
 
-            //     TimeRange timeRange1 = new TimeRange(
-            //         new DateTime( 2011, 2, 22, 12, 0, 0 ),
-            //         new DateTime( 2011, 2, 22, 16, 0, 0 ) );
-            //     Console.WriteLine( "TimeRange1: " + timeRange1 );
+            var ids = participantList.Select(x => x.Id).ToArray();           
+            
 
 
-            //     TimeRange timeRange2 = new TimeRange(
-            //         new DateTime( 2011, 2, 22, 15, 0, 0 ),
-            //         new DateTime( 2011, 2, 22, 18, 0, 0 ) );
-            //     Console.WriteLine( "TimeRange2: " + timeRange2 );
-
-
-            //     TimeRange timeRange3 = new TimeRange(
-            //         new DateTime( 2011, 2, 22, 15, 0, 0 ),
-            //         new DateTime( 2011, 2, 22, 21, 0, 0 ) );
-            //     Console.WriteLine( "TimeRange3: " + timeRange3 );
-
-            //     Console.WriteLine( "Relation Between TimeRange 1 and TimeRange 2 : " +
-            //          timeRange1.GetRelation( timeRange2 ) );
-
-
-            //     Console.WriteLine( "Relation Between TimeRange 1 and TimeRange 3 : " +
-            //                         timeRange1.GetRelation( timeRange3 ) );
-                
-            //     Console.WriteLine( "Relation Between TimeRange 3 and TimeRange 2 : "+
-            //                         timeRange3.GetRelation( timeRange2 ) );
-
-
-            //     // --- intersection ---
-            //     Console.WriteLine( "TimeRange1.GetIntersection( TimeRange2 ): " +
-            //                         timeRange1.GetIntersection( timeRange2 ) );
-
-            //     // --- intersection ---
-            //     Console.WriteLine( "TimeRange2.GetIntersection( TimeRange3 ): " +
-            //                         timeRange2.GetIntersection( timeRange3 ) );
-
-                
-            //     var a = timeRange2.GetIntersection( timeRange3 );
-            //     Console.WriteLine(a);
-
-
-            // //    var hostDate = new DateTime(2008, 3, 1, 7, 0, 0);
-            // //    var participantDate =  new DateTime(2008, 3, 1, 7, 0, 0);
-
-            // //    Tuple<DateTime, DateTime> ranges = new Tuple<DateTime, DateTime>(hostDate,participantDate);
-               
-               
-            // //    bool result = Overlap(ranges);
-            // //    Console.WriteLine(result);
-
-            // var hostStart = new DateTime(2008, 3, 1, 7, 0, 0);
-            // var hostEnd = new DateTime(2011, 3, 1, 7, 0, 0);
-
-            // var participantStart = new DateTime(2012, 3, 1, 13, 15, 20);
-            // var participantEnd = new DateTime(2012, 3, 1, 13, 27, 25);
-
-            // // DateTime a = new DateTime(2010, 05, 12, 13, 15, 00);
-            // // DateTime b = new DateTime(2010, 05, 12, 13, 45, 00);
-
-
-            // bool result = intersects(hostStart, hostEnd, participantStart, participantEnd);
-            // Console.WriteLine(result);
-
-            // TimeSpan diff = participantEnd - participantStart;
-            // Console.WriteLine(diff);
-
-
-            return new
+            return new  
             {
                 Success = true,
+                Data = ids,
             };
             
         }

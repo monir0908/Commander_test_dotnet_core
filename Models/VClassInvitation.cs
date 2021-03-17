@@ -6,6 +6,8 @@ namespace Commander.Models{
 
     public class VClassInvitation : NumberEntityField
     {
+        public long VClassId { get; set; }
+        
         [StringLength(750)]
         public string RoomId { get; set; }
 
