@@ -58,15 +58,23 @@ namespace Commander.Models
         #region DbSet
         public DbSet<Project> Project { get; set; }
         public DbSet<Batch> Batch { get; set; }
-        public DbSet<BatchHost> BatchHost { get; set; }
-        public DbSet<BatchHostParticipant> BatchHostParticipant { get; set; }
-        public DbSet<Conference> Conference{ get; set; }
-        public DbSet<ConferenceHistory> ConferenceHistory { get; set; }
-        public DbSet<Command> Command { get; set; }
+
+
+        public DbSet<ProjectBatch> ProjectBatch { get; set; }
+        public DbSet<ProjectBatchHost> ProjectBatchHost { get; set; }
+        public DbSet<ProjectBatchHostParticipant> ProjectBatchHostParticipant { get; set; }
+
+
 
         public DbSet<VClass> VClass{ get; set; }
         public DbSet<VClassInvitation> VClassInvitation{ get; set; }
         public DbSet<VClassDetail> VClassDetail { get; set; }
+
+
+        public DbSet<Conference> Conference{ get; set; }
+        public DbSet<ConferenceHistory> ConferenceHistory { get; set; }
+
+        
 
 
         #endregion

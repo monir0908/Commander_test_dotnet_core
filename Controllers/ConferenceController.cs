@@ -31,6 +31,12 @@ namespace Commander.Controllers
             return Ok(await _services.GetProjectListByHostId(hostId));
         }
 
+        [HttpGet, Route("GetBatchListByProjectIdAndHostId/{projectId:long}/{hostId}")]
+        public async Task<IActionResult> GetBatchListByProjectIdAndHostId(long projectId, string hostId)
+        {
+            return Ok(await _services.GetBatchListByProjectIdAndHostId(projectId, hostId));
+        }
+
         [HttpGet, Route("GetBatchListByProjectId/{pId:long}")]
         public async Task<IActionResult> GetBatchListByProjectId(long pId)
         {
@@ -41,6 +47,12 @@ namespace Commander.Controllers
         public async Task<IActionResult> GetParticipantListByBatchId(long batchId)
         {
             return Ok(await _services.GetParticipantListByBatchId(batchId));
+        }
+
+        [HttpGet, Route("GetParticipantListByProjectIdBatchIdAndHostId/{projectId:long}/{batchId:long}/{hostId}")]
+        public async Task<IActionResult> GetParticipantListByProjectIdBatchIdAndHostId(long projectId, long batchId, string hostId)
+        {
+            return Ok(await _services.GetParticipantListByProjectIdBatchIdAndHostId(projectId, batchId, hostId));
         }
 
 
@@ -135,16 +147,16 @@ namespace Commander.Controllers
 
 
 
-        [HttpGet, Route("GetParticipantListByBatchAndHostId/{batchId:long}/{hostId}")]
-        public async Task<IActionResult> GetParticipantListByBatchAndHostId(long batchId, string hostId)
-        {
-            return Ok(await _services.GetParticipantListByBatchAndHostId(batchId, hostId));
-        }
-
         [HttpGet, Route("GetCurrentOnGoingVirtualClassListByHostId/{hostId}")]
         public async Task<IActionResult> GetCurrentOnGoingVirtualClassListByHostId(string hostId)
         {
             return Ok(await _services.GetCurrentOnGoingVirtualClassListByHostId(hostId));
+        }
+
+        [HttpGet, Route("GetInvitationListByParticipantId/{participantId}")]
+        public async Task<IActionResult> GetInvitationListByParticipantId(string participantId)
+        {
+            return Ok(await _services.GetInvitationListByParticipantId(participantId));
         }
 
         [HttpPost, Route("CreateVirtualClass")]
@@ -166,10 +178,10 @@ namespace Commander.Controllers
             return Ok(await _services.JoinVirtualClassByHost(vClassDetail, participantList));
         }
 
-        [HttpPost, Route("JoinVirtualClasByParticipant")]
-        public async Task<IActionResult> JoinVirtualClasByParticipant(VClassDetail vClassDetail)
+        [HttpPost, Route("JoinVirtualClassByParticipant")]
+        public async Task<IActionResult> JoinVirtualClassByParticipant(VClassDetail vClassDetail)
         {
-            return Ok(await _services.JoinVirtualClasByParticipant(vClassDetail));
+            return Ok(await _services.JoinVirtualClassByParticipant(vClassDetail));
         }
         
 

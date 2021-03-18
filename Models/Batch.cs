@@ -8,11 +8,6 @@ namespace Commander.Models{
     {
 
 
-        [ForeignKey("ProjectId")]
-        public virtual Project Project { get; set; }
-        public long ProjectId { get; set; }
-
-
         [Required, StringLength(750)]
         public string BatchName { get; set; }
 

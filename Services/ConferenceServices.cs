@@ -44,6 +44,17 @@ namespace Commander.Services{
         {
             return _context.VClass.Any(c => c.HostId == hostId && c.Status == "On-Going");
         }
+
+        private bool IsParticipantCurrentlyInVirtualClass(string participantId)
+        {
+            return _context.VClassDetail.Any(c => c.ParticipantId == participantId && c.LeaveTime == null);
+        }
+
+        private bool IsVirtualClassJoinable(long vclassId){            
+
+            return _context.VClass.Any(c => c.Id == vclassId && c.Status == "On-Going");
+
+        }
         private bool HasHostJoinedTheVirtualClass(VClassDetail obj)
         {
             Console.WriteLine("Host ID: ");
@@ -95,7 +106,7 @@ namespace Commander.Services{
         private void RemoveInvitationList(long vClassId)
         {
             
-            _context.VClassInvitation.RemoveRange(_context.VClassInvitation.Where(x => x.VClassId == vClassId));
+            _context.VClassInvitation.RemoveRange(_context.VClassInvitation.Where(x => x.VClassId == vClassId && x.Status == "Invited"));
             _context.SaveChanges();   
             return;
             
@@ -111,17 +122,26 @@ namespace Commander.Services{
             {
 
                 
-               IList<long> projectIds = _context.BatchHost.Where(x => x.HostId == hostId).Select(x => x.ProjectId).Distinct().ToArray();
+               var query =  _context.ProjectBatchHost.Where(x => x.HostId == hostId).AsQueryable();
 
-               var query = _context.Project.Where(x => projectIds.Contains(x.Id)).AsQueryable();
-               var data = await query.OrderByDescending(x => x.Id).Select(x => new
-                {
-                    x.Id,
-                    x.ProjectName,
-                }).ToListAsync();
+               var data = await query.Join(_context.ProjectBatch,
+               x => x.ProjectBatchId,
+               y => y.Id,
+               (x, y) => new { ProjectBatchHost = x, ProjectBatch = y })
+               .Join(_context.Project,
+               x => x.ProjectBatch.ProjectId,
+               y => y.Id,
+               (x, y) => new { x.ProjectBatchHost, x.ProjectBatch, Project = y })
+               .Select(x => new
+               {
+                   Id = x.Project.Id,
+                   ProjectName = x.Project.ProjectName,
+               }).Distinct().ToListAsync();
+
+              
 
 
-               var count = projectIds.Count;
+               var count = data.Count;
 
                return new
                 {
@@ -146,23 +166,56 @@ namespace Commander.Services{
 
             try
             {
-                var query = _context.Batch.Where(x => x.ProjectId == pId).AsQueryable();
+                var query = _context.ProjectBatch.Where(x => x.ProjectId == pId).AsQueryable();
                 var data = await query.OrderByDescending(x => x.Id).Select(x => new
                 {
                     x.Id,
-                    x.BatchName,
-
-                    BatchParticipantList = _context.BatchHostParticipant.Where(p=> p.BatchId == x.Id)
-                    .Select(p=> new
-                    {
-                        p.ParticipantId,
-                        p.Participant.FirstName,
-                        p.Participant.LastName
-                    }).ToList(),
+                    x.Batch.BatchName,
                 }).ToListAsync();
 
 
                 var count = await query.CountAsync();
+
+                return new
+                {
+                    Success = true,
+                    Records = data,
+                    Total = count
+                };
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    Success = false,
+                    Message = ex.InnerException != null ? ex.InnerException.InnerException?.Message ?? ex.InnerException.Message : ex.Message
+                };
+            }
+
+        }
+
+
+        public async Task<object> GetBatchListByProjectIdAndHostId(long pId, string hostId)
+        {
+
+
+            try
+            {
+                long[] bIds = _context.ProjectBatch.Where(x => x.ProjectId == pId).Select(x => x.Id).ToArray();
+                
+                
+                var data = await _context.ProjectBatchHost.Where(x => bIds.Contains(x.ProjectBatchId) && x.HostId == hostId)
+                .Join(_context.ProjectBatch,
+                pbh => pbh.ProjectBatchId,
+                pb => pb.Id,
+                (x, y) => new { ProjectBatchHost = x, ProjectBatch = y })                
+                .Select(x => new{
+                    Id = x.ProjectBatch.Batch.Id,
+                    BatchName = x.ProjectBatch.Batch.BatchName
+                }).ToListAsync();
+
+
+                var count = data.Count;
 
                 return new
                 {
@@ -188,7 +241,7 @@ namespace Commander.Services{
 
             try
             {
-                var query = _context.BatchHostParticipant.Where(x => x.BatchId == batchId).AsQueryable();
+                var query = _context.ProjectBatchHostParticipant.Where(x => x.ParticipantId == "fdsfdsfd").AsQueryable();
                 var data = await query.OrderByDescending(x => x.Id).Select(x => new
                 {
                     x.ParticipantId,
@@ -224,23 +277,13 @@ namespace Commander.Services{
 
             try
             {
-                var query = _context.BatchHostParticipant.Where(x => x.HostId == hostId).AsQueryable();
+                var query = _context.ProjectBatchHostParticipant.Where(x => x.ParticipantId == "dfsdfdsf").AsQueryable();
                 var data = await query.OrderByDescending(x => x.Id).Select(x => new
                 {
                     x.Id,
-                    x.ProjectId,
-                    x.Project.ProjectName,
-                    x.BatchId,
-                    x.Batch.BatchName,
-                    x.HostId,
                     x.ParticipantId,
                     x.Participant.FirstName,
                     x.Participant.LastName,
-                    IsAnyExistingConferenceBetweenThem = _context.Conference.Any(c=> c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going"),
-                    HasJoinedByHost = _context.Conference.Where(c=> c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going").OrderByDescending(c => c.Id).Select(c => c.HasJoinedByHost).FirstOrDefault(),
-                    HasJoinedByParticipant = _context.Conference.Where(c=> c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going").OrderByDescending(c => c.Id).Select(c => c.HasJoinedByParticipant).FirstOrDefault(),
-                    RoomId = _context.Conference.Where(c => c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going").OrderByDescending(c => c.Id).Select(c => c.RoomId).FirstOrDefault()
-
                 }).ToListAsync();
 
 
@@ -313,23 +356,10 @@ namespace Commander.Services{
 
             try
             {
-                var query = _context.BatchHostParticipant.Where(x => x.ParticipantId == participantId).AsQueryable();
+                var query = _context.ProjectBatchHostParticipant.Where(x => x.ParticipantId == participantId).AsQueryable();
                 var data = await query.OrderByDescending(x => x.Id).Select(x => new
                 {
                     x.Id,
-                    x.ProjectId,
-                    x.Project.ProjectName,
-                    x.BatchId,
-                    x.Batch.BatchName,
-                    x.HostId,
-                    x.ParticipantId,
-                    x.Host.FirstName,
-                    x.Host.LastName,
-                    IsAnyExistingConferenceBetweenThem = _context.Conference.Any(c => c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going"),
-                    HasJoinedByHost = _context.Conference.Where(c=> c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going").OrderByDescending(c => c.Id).Select(c => c.HasJoinedByHost).FirstOrDefault(),
-                    HasJoinedByParticipant = _context.Conference.Where(c=> c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going").OrderByDescending(c => c.Id).Select(c => c.HasJoinedByParticipant).FirstOrDefault(),
-                    RoomId = _context.Conference.Where(c => c.HostId == x.HostId && c.ParticipantId == x.ParticipantId && c.Status == "On-Going").OrderByDescending(c => c.Id).Select(c => c.RoomId).FirstOrDefault()
-
                 }).ToListAsync();
 
 
@@ -458,6 +488,7 @@ namespace Commander.Services{
         public async Task<object> JoinConferenceByHost(Conference confObj)
         {
 
+            
             try
             {                
                 Conference existingConf =
@@ -921,14 +952,30 @@ namespace Commander.Services{
         //==============================================================================
 
 
-        public async Task<object> GetParticipantListByBatchAndHostId(long batchId, string hostId)
+        public async Task<object> GetParticipantListByProjectIdBatchIdAndHostId(long projectId, long batchId, string hostId)
         {
 
 
             try
             {
-                var query = _context.BatchHostParticipant.Where(x => x.BatchId == batchId && x.HostId == hostId).AsQueryable();
-                var data = await query.OrderByDescending(x => x.Id).Select(x => new
+                long [] pbIds = _context.ProjectBatch.Where(x => x.ProjectId == projectId && x.BatchId == batchId).Select(x => x.Id).ToArray();
+                
+                foreach (var item in pbIds)
+                {
+                    Console.WriteLine(item);
+                }
+
+                
+
+                long[] pbhIds = _context.ProjectBatchHost.Where(x => pbIds.Contains(x.ProjectBatchId) && x.HostId == hostId).Select(x => x.Id).ToArray();
+
+
+                foreach (var item in pbhIds)
+                {
+                    Console.WriteLine(item);
+                }
+                var data = await _context.ProjectBatchHostParticipant.Where(x => pbhIds.Contains(x.ProjectBatchHostId))
+                .Select(x => new
                 {
                     x.ParticipantId,
                     x.Participant.FirstName,
@@ -937,13 +984,14 @@ namespace Commander.Services{
                 }).ToListAsync();
 
 
-                var count = await query.CountAsync();
+                var count = data.Count;
 
                 return new
                 {
                     Success = true,
                     Records = data,
-                    Total = count
+                    Total = count,
+                    pbIds = pbIds
                 };
             }
             catch (Exception ex)
@@ -957,10 +1005,11 @@ namespace Commander.Services{
 
         }
 
+        
         public async Task<object> GetCurrentOnGoingVirtualClassListByHostId(string hostId){
             try
             {
-                var query = _context.VClass.Where(x => x.Status == "On-Going").AsQueryable();
+                var query = _context.VClass.Where(x => x.Status == "On-Going" && x.HostId == hostId).AsQueryable();
                 var data = await query.OrderByDescending(x => x.Id)
                 .Select(x => new
                 {
@@ -993,6 +1042,51 @@ namespace Commander.Services{
                 };
             }
         }
+
+        public async Task<object> GetInvitationListByParticipantId(string participantId){
+            try
+            {
+                var query = _context.VClassInvitation.Where(x => x.Status == "Invited" && x.ParticipantId == participantId).AsQueryable();
+                var data = await query.OrderByDescending(x => x.Id)
+                .Select(x => new
+                {
+                    x.Id,
+                    x.VClassId,
+                    x.RoomId,
+                    x.ParticipantId,
+                    x.HostId,
+                    HostFirstName= x.Host.FirstName,
+                    HostLastName= x.Host.LastName,
+                    x.BatchId,
+                    x.Batch.BatchName,                    
+                    x.Status,
+                    HasJoinedByParticipant = _context.VClassDetail.Any(c => c.ParticipantId == participantId && c.VClassId == x.VClassId && c.RoomId == x.RoomId && c.LeaveTime == null),
+
+                }).ToListAsync();
+
+                var count = await query.CountAsync();               
+
+
+                return new
+                {
+                    Success = true,
+                    Records = data,
+                    Total = count
+                };
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    Success = false,
+                    Message = ex.InnerException != null ? ex.InnerException.InnerException?.Message ?? ex.InnerException.Message : ex.Message
+                };
+            }
+        
+
+        }
+
+
 
         public async Task<object> CreateVirtualClass(VClass vClassObj)
         {
@@ -1052,11 +1146,22 @@ namespace Commander.Services{
         
         public async Task<object> JoinVirtualClassByHost(VClassDetail vClassDetail, IEnumerable<ParticipantList> participantList)
         {
+            bool isVirtualClassJoinable = IsVirtualClassJoinable(vClassDetail.VClassId);
+            if(isVirtualClassJoinable == false){
+                    return new
+                    {
+                        Success = false,
+                        Message = "It seems, the virtual class has been closed by you !"
+
+                    };
+                }
+
+
 
             try
             {   
                 bool hasHostJoinedTheVirtualClass = HasHostJoinedTheVirtualClass(vClassDetail);
-                Console.WriteLine(hasHostJoinedTheVirtualClass);
+                // Console.WriteLine(hasHostJoinedTheVirtualClass);
 
                 if(hasHostJoinedTheVirtualClass){
                     return new
@@ -1075,10 +1180,19 @@ namespace Commander.Services{
                     await _context.SaveChangesAsync();
 
                     
+                    var HostDetail = _context.VClassDetail.Where(x => x.VClassId == vClassDetail.VClassId && x.HostId == vClassDetail.HostId)
+                    .Select(x => new{
+                        HostFullName = x.Host.FirstName + " " + x.Host.LastName,
+                        x.RoomId,
+                    }).FirstOrDefault();
+
+                    Console.WriteLine(HostDetail.HostFullName);
+
+                    
                     foreach (var participant in participantList)
                     {
                         // Now, signalR comes into play
-                        await _notificationHubContext.Clients.All.SendAsync("JoinedByHost", participant.Id);
+                        await _notificationHubContext.Clients.All.SendAsync("JoinedByHost", participant.Id, HostDetail.RoomId, HostDetail.HostFullName);
                         
                     }
 
@@ -1087,7 +1201,7 @@ namespace Commander.Services{
                     {
                         Success = true,
                         Records = vClassDetail,
-                        Message = "Successfully conference joined by Host !"
+                        Message = "You successfully joined class !"
                     };
 
                 }   
@@ -1104,8 +1218,17 @@ namespace Commander.Services{
             }
         }
 
-        public async Task<object> JoinVirtualClasByParticipant(VClassDetail vClassDetail)
+        public async Task<object> JoinVirtualClassByParticipant(VClassDetail vClassDetail)
         {
+            bool isVirtualClassJoinable = IsVirtualClassJoinable(vClassDetail.VClassId);
+            if(isVirtualClassJoinable == false){
+                    return new
+                    {
+                        Success = false,
+                        Message = "It seems, the virtual class has been closed by Teacher !"
+
+                    };
+                }
 
             try
             {                
@@ -1120,6 +1243,16 @@ namespace Commander.Services{
 
                     };
                 }
+                else if(IsParticipantCurrentlyInVirtualClass(vClassDetail.ParticipantId))
+                {
+                    return new
+                    {
+                        Success = false,
+                        Message = "It seems, you currently in a call. Therefore, you won't be able to join in another class !"
+
+                    };
+                    
+                }
 
                 else
                 {
@@ -1131,7 +1264,8 @@ namespace Commander.Services{
                     return new
                     {
                         Success = true,
-                        Message = "Successfully class joined by Participant !"
+                        Records = vClassDetail,
+                        Message = "Class joined successfully !"
                     };
 
                 }   
@@ -1185,11 +1319,31 @@ namespace Commander.Services{
                             await _context.SaveChangesAsync();
 
                             // Now, signalR comes into play
-                            await _notificationHubContext.Clients.All.SendAsync("EndedByHost", obj.ParticipantId);
+                            // await _notificationHubContext.Clients.All.SendAsync("EndedByHost", obj.ParticipantId);
                             
                         }                       
                         
                     }
+
+                   
+
+
+                    // Letting all invitess know if class has been ended by host
+                    var invitees = _context.VClassInvitation.Where(c=> c.VClassId == existingConf.Id && c.Status == "Invited").Select(c=> new{
+                        c.ParticipantId,
+                        HostFullName = c.Host.FirstName + " " + c.Host.LastName,
+                        c.RoomId,
+                    }).ToList();
+
+
+                    foreach (var item in invitees)
+                    {
+                        
+                        await _notificationHubContext.Clients.All.SendAsync("EndedByHost", item.ParticipantId, item.RoomId, item.HostFullName);
+                        
+                    }
+
+
 
                     // Removing all invitation
 
@@ -1247,6 +1401,7 @@ namespace Commander.Services{
                     .Select(c=> c)
                     .OrderByDescending(c => c.Id)
                     .FirstOrDefault();
+
                     
 
                     if(detailObj !=null && detailObj.LeaveTime == null){
@@ -1258,7 +1413,7 @@ namespace Commander.Services{
                         return new
                         {
                             Success = false,
-                            Message = "The virtual class has already been ended. We found 'LeaveTime' is already set."
+                            Message = "The virtual class has already been ended by your Teacher."
                         };
                     }                    
 
@@ -1352,7 +1507,7 @@ namespace Commander.Services{
         {
 
 
-            await _context.Command.Select(c => c).ToListAsync();
+            await _context.Project.Select(c => c).ToListAsync();
 
             var participantList =   _context.VClassDetail.Where(c=> c.VClassId == 1 && c.ParticipantId !=null).Select(c=> c).ToList();
 

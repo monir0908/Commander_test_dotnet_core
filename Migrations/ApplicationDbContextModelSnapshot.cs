@@ -122,97 +122,9 @@ namespace Commander.Migrations
                     b.Property<DateTime?>("CreatedDateTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<long>("ProjectId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("ProjectId");
 
                     b.ToTable("Batch");
-                });
-
-            modelBuilder.Entity("Commander.Models.BatchHost", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<long>("BatchId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("HostId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<long>("ProjectId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BatchId");
-
-                    b.HasIndex("HostId");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("BatchHost");
-                });
-
-            modelBuilder.Entity("Commander.Models.BatchHostParticipant", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<long>("BatchId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("CreatedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("HostId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("ParticipantId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<long>("ProjectId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BatchId");
-
-                    b.HasIndex("HostId");
-
-                    b.HasIndex("ParticipantId");
-
-                    b.HasIndex("ProjectId");
-
-                    b.ToTable("BatchHostParticipant");
-                });
-
-            modelBuilder.Entity("Commander.Models.Command", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("HowTo")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Line")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Platform")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Command");
                 });
 
             modelBuilder.Entity("Commander.Models.Conference", b =>
@@ -296,6 +208,81 @@ namespace Commander.Migrations
                     b.HasIndex("ParticipantId");
 
                     b.ToTable("ConferenceHistory");
+                });
+
+            modelBuilder.Entity("Commander.Models.ProjectBatch", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long>("BatchId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("CreatedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long>("ProjectId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BatchId");
+
+                    b.HasIndex("ProjectId");
+
+                    b.ToTable("ProjectBatch");
+                });
+
+            modelBuilder.Entity("Commander.Models.ProjectBatchHost", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime?>("CreatedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("HostId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<long>("ProjectBatchId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HostId");
+
+                    b.HasIndex("ProjectBatchId");
+
+                    b.ToTable("ProjectBatchHost");
+                });
+
+            modelBuilder.Entity("Commander.Models.ProjectBatchHostParticipant", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime?>("CreatedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ParticipantId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<long>("ProjectBatchHostId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParticipantId");
+
+                    b.HasIndex("ProjectBatchHostId");
+
+                    b.ToTable("ProjectBatchHostParticipant");
                 });
 
             modelBuilder.Entity("Commander.Models.VClass", b =>
@@ -588,76 +575,6 @@ namespace Commander.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
-            modelBuilder.Entity("Commander.Models.Batch", b =>
-                {
-                    b.HasOne("Commander.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Project");
-                });
-
-            modelBuilder.Entity("Commander.Models.BatchHost", b =>
-                {
-                    b.HasOne("Commander.Models.Batch", "Batch")
-                        .WithMany()
-                        .HasForeignKey("BatchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Commander.Models.ApplicationUser", "Host")
-                        .WithMany()
-                        .HasForeignKey("HostId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Commander.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Batch");
-
-                    b.Navigation("Host");
-
-                    b.Navigation("Project");
-                });
-
-            modelBuilder.Entity("Commander.Models.BatchHostParticipant", b =>
-                {
-                    b.HasOne("Commander.Models.Batch", "Batch")
-                        .WithMany()
-                        .HasForeignKey("BatchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Commander.Models.ApplicationUser", "Host")
-                        .WithMany()
-                        .HasForeignKey("HostId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Commander.Models.ApplicationUser", "Participant")
-                        .WithMany()
-                        .HasForeignKey("ParticipantId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Commander.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Batch");
-
-                    b.Navigation("Host");
-
-                    b.Navigation("Participant");
-
-                    b.Navigation("Project");
-                });
-
             modelBuilder.Entity("Commander.Models.Conference", b =>
                 {
                     b.HasOne("Commander.Models.Batch", "Batch")
@@ -698,6 +615,61 @@ namespace Commander.Migrations
                     b.Navigation("Host");
 
                     b.Navigation("Participant");
+                });
+
+            modelBuilder.Entity("Commander.Models.ProjectBatch", b =>
+                {
+                    b.HasOne("Commander.Models.Batch", "Batch")
+                        .WithMany()
+                        .HasForeignKey("BatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Commander.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Batch");
+
+                    b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("Commander.Models.ProjectBatchHost", b =>
+                {
+                    b.HasOne("Commander.Models.ApplicationUser", "Host")
+                        .WithMany()
+                        .HasForeignKey("HostId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Commander.Models.ProjectBatch", "ProjectBatch")
+                        .WithMany()
+                        .HasForeignKey("ProjectBatchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Host");
+
+                    b.Navigation("ProjectBatch");
+                });
+
+            modelBuilder.Entity("Commander.Models.ProjectBatchHostParticipant", b =>
+                {
+                    b.HasOne("Commander.Models.ApplicationUser", "Participant")
+                        .WithMany()
+                        .HasForeignKey("ParticipantId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Commander.Models.ProjectBatchHost", "ProjectBatchHost")
+                        .WithMany()
+                        .HasForeignKey("ProjectBatchHostId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Participant");
+
+                    b.Navigation("ProjectBatchHost");
                 });
 
             modelBuilder.Entity("Commander.Models.VClass", b =>
