@@ -2,7 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Commander{
+namespace Commander.Models{
 
     public class Project : NumberEntityField
     {

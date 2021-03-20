@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "tdGIaLn5yB1KVEHoB05C51N/XjjWgYmhf1/OwJqeuiic/BbohNrzZRvDZFzRaLHLy21n6hKf4lgYGdAtmrREYA==",
+  "dgSpecHash": "DQ+ujXaZ1a58CRt3j5FlrJnJAo8152Zy/uIRrXpUc34Q6AlsXT1b/gXvYfar03+H3shh5qOFshboDar1q/qGfQ==",
   "success": true,
   "projectFilePath": "C:\\MONIR-DOTNET-CORE-PROJECTS\\signalR_dotnet_core_101\\Commander.csproj",
   "expectedPackageFiles": [
@@ -183,7 +183,8 @@
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.xml.xdocument\\4.3.0\\system.xml.xdocument.4.3.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.xml.xmldocument\\4.3.0\\system.xml.xmldocument.4.3.0.nupkg.sha512",
     "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder\\system.xml.xmlserializer\\4.3.0\\system.xml.xmlserializer.4.3.0.nupkg.sha512",
-    "C:\\Users\\User\\.nuget\\packages\\timeperiodlibrary.net\\2.1.1\\timeperiodlibrary.net.2.1.1.nupkg.sha512"
+    "C:\\Users\\User\\.nuget\\packages\\timeperiodlibrary.net\\2.1.1\\timeperiodlibrary.net.2.1.1.nupkg.sha512",
+    "C:\\Users\\User\\.nuget\\packages\\microsoft.netcore.app.ref\\5.0.0\\microsoft.netcore.app.ref.5.0.0.nupkg.sha512"
   ],
   "logs": []
 }

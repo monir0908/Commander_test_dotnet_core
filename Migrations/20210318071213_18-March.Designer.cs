@@ -4,14 +4,16 @@ using Commander.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Commander.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210318071213_18-March")]
+    partial class _18March
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -210,26 +212,6 @@ namespace Commander.Migrations
                     b.ToTable("ConferenceHistory");
                 });
 
-            modelBuilder.Entity("Commander.Models.Project", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime?>("CreatedDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("ProjectName")
-                        .IsRequired()
-                        .HasMaxLength(750)
-                        .HasColumnType("nvarchar(750)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Project");
-                });
-
             modelBuilder.Entity("Commander.Models.ProjectBatch", b =>
                 {
                     b.Property<long>("Id")
@@ -262,9 +244,6 @@ namespace Commander.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long>("BatchId")
-                        .HasColumnType("bigint");
-
                     b.Property<DateTime?>("CreatedDateTime")
                         .HasColumnType("datetime2");
 
@@ -274,18 +253,11 @@ namespace Commander.Migrations
                     b.Property<long>("ProjectBatchId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("ProjectId")
-                        .HasColumnType("bigint");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("BatchId");
 
                     b.HasIndex("HostId");
 
                     b.HasIndex("ProjectBatchId");
-
-                    b.HasIndex("ProjectId");
 
                     b.ToTable("ProjectBatchHost");
                 });
@@ -452,6 +424,26 @@ namespace Commander.Migrations
                     b.HasIndex("ParticipantId");
 
                     b.ToTable("VClassInvitation");
+                });
+
+            modelBuilder.Entity("Commander.Project", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime?>("CreatedDateTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ProjectName")
+                        .IsRequired()
+                        .HasMaxLength(750)
+                        .HasColumnType("nvarchar(750)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Project");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -635,7 +627,7 @@ namespace Commander.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Commander.Models.Project", "Project")
+                    b.HasOne("Commander.Project", "Project")
                         .WithMany()
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -648,12 +640,6 @@ namespace Commander.Migrations
 
             modelBuilder.Entity("Commander.Models.ProjectBatchHost", b =>
                 {
-                    b.HasOne("Commander.Models.Batch", "Batch")
-                        .WithMany()
-                        .HasForeignKey("BatchId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("Commander.Models.ApplicationUser", "Host")
                         .WithMany()
                         .HasForeignKey("HostId")
@@ -665,17 +651,7 @@ namespace Commander.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Commander.Models.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Batch");
-
                     b.Navigation("Host");
-
-                    b.Navigation("Project");
 
                     b.Navigation("ProjectBatch");
                 });

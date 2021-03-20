@@ -22,8 +22,7 @@ namespace Commander.Controllers
             this._services = services;
         }
 
-        // Host Side
-
+        // Host Side : VClass Related Endpoints
 
         [HttpGet, Route("GetProjectListByHostId/{hostId}")]
         public async Task<IActionResult> GetProjectListByHostId(string hostId)
@@ -37,126 +36,16 @@ namespace Commander.Controllers
             return Ok(await _services.GetBatchListByProjectIdAndHostId(projectId, hostId));
         }
 
-        [HttpGet, Route("GetBatchListByProjectId/{pId:long}")]
-        public async Task<IActionResult> GetBatchListByProjectId(long pId)
-        {
-            return Ok(await _services.GetBatchListByProjectId(pId));
-        }
-
-        [HttpGet, Route("GetParticipantListByBatchId/{batchId:long}")]
-        public async Task<IActionResult> GetParticipantListByBatchId(long batchId)
-        {
-            return Ok(await _services.GetParticipantListByBatchId(batchId));
-        }
-
         [HttpGet, Route("GetParticipantListByProjectIdBatchIdAndHostId/{projectId:long}/{batchId:long}/{hostId}")]
         public async Task<IActionResult> GetParticipantListByProjectIdBatchIdAndHostId(long projectId, long batchId, string hostId)
         {
             return Ok(await _services.GetParticipantListByProjectIdBatchIdAndHostId(projectId, batchId, hostId));
         }
 
-
-
-        [HttpGet, Route("GetParticipantListByHostId/{hostId}")]
-        public async Task<IActionResult> GetParticipantListByHostId(string hostId)
-        {
-            return Ok(await _services.GetParticipantListByHostId(hostId));
-        }
-
-        
-        [HttpGet, Route("GetOnGoingConferenceByHostId/{hostId}")]
-        public async Task<IActionResult> GetOnGoingConferenceByHostId(string hostId)
-        {
-            return Ok(await _services.GetOnGoingConferenceByHostId(hostId));
-        }
-
-
-        // Participant Side
-
-        [HttpGet, Route("GetHostListByParticipantId/{pId}")]
-        public async Task<IActionResult> GetHostListByParticipantId(string pId)
-        {
-            return Ok(await _services.GetHostListByParticipantId(pId));
-        }
-
-
-
-
-
-
-
-
-        [HttpPost, Route("CreateConference")]
-        public async Task<IActionResult> CreateConference(Conference confObj)
-        {
-            return Ok(await _services.CreateConference(confObj));
-        }
-        
-        
-        [HttpPost, Route("JoinConferenceByHost")]
-        public async Task<IActionResult> JoinConferenceByHost(Conference confObj)
-        {
-            return Ok(await _services.JoinConferenceByHost(confObj));
-        }
-        
-        [HttpPost, Route("JoinConferenceByParticipant")]
-        public async Task<IActionResult> JoinConferenceByParticipant(Conference confObj)
-        {
-            return Ok(await _services.JoinConferenceByParticipant(confObj));
-        }
-
-        [HttpPost, Route("EndConference")]
-        public async Task<IActionResult> EndConference(Conference confObj)
-        {
-            return Ok(await _services.EndConference(confObj));
-        }
-        
-
-        [HttpPost, Route("EndConferenceByParticipant")]
-        public async Task<IActionResult> EndCEndConferenceByParticipantonference(Conference confObj)
-        {
-            return Ok(await _services.EndConferenceByParticipant(confObj));
-        }
-
-        [HttpGet, Route("GetConferenceList")]
-        public async Task<IActionResult> GetConferenceList()
-        {
-            return Ok(await _services.GetConferenceList());
-        }
-
-        [HttpGet, Route("TestApi")]
-        public async Task<IActionResult> TestApi()
-        {
-            return Ok(await _services.TestApi());
-        }
-
-        [HttpPost, Route("GetCallingHistoryByDaterange")]
-        public async Task<IActionResult> GetCallingHistoryByDaterange(DateTimeParams obj)
-        {
-            return Ok(await _services.GetCallingHistoryByDaterange(obj));
-        }
-
-        [HttpGet, Route("GetConferenceHistoryDetailById/{confId}")]
-        public async Task<IActionResult> GetConferenceHistoryDetailById(long confId)
-        {
-            return Ok(await _services.GetConferenceHistoryDetailById(confId));
-        }
-
-
-
-
-
-
         [HttpGet, Route("GetCurrentOnGoingVirtualClassListByHostId/{hostId}")]
         public async Task<IActionResult> GetCurrentOnGoingVirtualClassListByHostId(string hostId)
         {
             return Ok(await _services.GetCurrentOnGoingVirtualClassListByHostId(hostId));
-        }
-
-        [HttpGet, Route("GetInvitationListByParticipantId/{participantId}")]
-        public async Task<IActionResult> GetInvitationListByParticipantId(string participantId)
-        {
-            return Ok(await _services.GetInvitationListByParticipantId(participantId));
         }
 
         [HttpPost, Route("CreateVirtualClass")]
@@ -178,29 +67,25 @@ namespace Commander.Controllers
             return Ok(await _services.JoinVirtualClassByHost(vClassDetail, participantList));
         }
 
-        [HttpPost, Route("JoinVirtualClassByParticipant")]
-        public async Task<IActionResult> JoinVirtualClassByParticipant(VClassDetail vClassDetail)
-        {
-            return Ok(await _services.JoinVirtualClassByParticipant(vClassDetail));
-        }
-        
-
         [HttpPost, Route("EndVirtualClassByHost")]
         public async Task<IActionResult> EndVirtualClassByHost(VClass vClassObj)
         {
             return Ok(await _services.EndVirtualClassByHost(vClassObj));
         }
 
-        [HttpPost, Route("EndVirtualClassByParticipant")]
-        public async Task<IActionResult> EndVirtualClassByParticipant(VClassDetail vClassDetail)
+
+        // Host Side: Miscellaneous Endpoints
+
+        [HttpGet, Route("GetBatchListByProjectId/{pId:long}")]
+        public async Task<IActionResult> GetBatchListByProjectId(long pId)
         {
-            return Ok(await _services.EndVirtualClassByParticipant(vClassDetail));
+            return Ok(await _services.GetBatchListByProjectId(pId));
         }
 
-        [HttpGet, Route("GetVirtualClassCallingHistoryByDaterange")]
-        public async Task<IActionResult> GetVirtualClassCallingHistoryByDaterange(DateTimeParams obj)
+        [HttpGet, Route("GetVirtualClassCallingDetailByDaterange")]
+        public async Task<IActionResult> GetVirtualClassCallingDetailByDaterange(DateTimeParams obj)
         {
-            return Ok(await _services.GetVirtualClassCallingHistoryByDaterange(obj));
+            return Ok(await _services.GetVirtualClassCallingDetailByDaterange(obj));
         }
 
         [HttpGet, Route("GetVirtualClassDetailById/{vclassId}")]
@@ -208,6 +93,60 @@ namespace Commander.Controllers
         {
             return Ok(await _services.GetVirtualClassDetailById(vclassId));
         }
+
+
+
+        // Participant Side : VClass Related Endpoints
+
+        [HttpGet, Route("GetInvitationListByParticipantId/{participantId}")]
+        public async Task<IActionResult> GetInvitationListByParticipantId(string participantId)
+        {
+            return Ok(await _services.GetInvitationListByParticipantId(participantId));
+        }
+
+        [HttpPost, Route("JoinVirtualClassByParticipant")]
+        public async Task<IActionResult> JoinVirtualClassByParticipant(VClassDetail vClassDetail)
+        {
+            return Ok(await _services.JoinVirtualClassByParticipant(vClassDetail));
+        }
+
+        [HttpPost, Route("EndVirtualClassByParticipant")]
+        public async Task<IActionResult> EndVirtualClassByParticipant(VClassDetail vClassDetail)
+        {
+            return Ok(await _services.EndVirtualClassByParticipant(vClassDetail));
+        }
+        
+        
+        
+        // Test Endpoints
+
+        [HttpGet, Route("TestApi")]
+        public async Task<IActionResult> TestApi()
+        {
+            return Ok(await _services.TestApi());
+        }
+
+
+
+
+
+
+        
+
+        
+
+        
+
+        
+
+        
+        
+
+        
+
+        
+
+        
 
 
     }

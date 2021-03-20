@@ -12,43 +12,34 @@ namespace Commander.Services{
 
     public interface IConferenceServices
     {
-        Task<object> GetProjectListByHostId(string hostId);
-        Task<object> GetBatchListByProjectIdAndHostId(long pId, string hostId);
-
-
-
-        Task<object> GetBatchListByProjectId(long pId);
-        Task<object> GetParticipantListByBatchId(long batchId);
-        Task<object> GetParticipantListByHostId(string hostId);
-        Task<object> GetOnGoingConferenceByHostId(string hostId);
-
-
-        Task<object> GetHostListByParticipantId(string participantId);
-
-
-        Task<object> CreateConference(Conference confObj);
-        Task<object> JoinConferenceByHost(Conference confObj);
-        Task<object> JoinConferenceByParticipant(Conference confObj);
-        Task<object> EndConference(Conference confObj);
-        Task<object> EndConferenceByParticipant(Conference confObj);
-        Task<object> GetConferenceList();        
-        Task<object> GetCallingHistoryByDaterange(DateTimeParams obj);
-        Task<object> GetConferenceHistoryDetailById(long confId);
-
-
-
-
+        
+        // Host Side : VClass Related Interfaces
+        Task<object> GetProjectListByHostId(string hostId);       
+        Task<object> GetBatchListByProjectIdAndHostId(long projectId, string hostId);
         Task<object> GetParticipantListByProjectIdBatchIdAndHostId(long projectId, long batchId, string hostId);
         Task<object> GetCurrentOnGoingVirtualClassListByHostId(string hostId);
-        Task<object> GetInvitationListByParticipantId(string participantId);
         Task<object> CreateVirtualClass(VClass vClassObj);
         Task<object> JoinVirtualClassByHost(VClassDetail vClassDetail, IEnumerable<ParticipantList> participantList);
-        Task<object> JoinVirtualClassByParticipant(VClassDetail vClassDetail);
         Task<object> EndVirtualClassByHost(VClass vClassObj);
-        Task<object> EndVirtualClassByParticipant(VClassDetail vClassDetail);
-        Task<object> GetVirtualClassCallingHistoryByDaterange(DateTimeParams obj);
+
+
+        // Host Side: Miscellaneous Interfaces
+        Task<object> GetBatchListByProjectId(long projectId);
+        Task<object> GetVirtualClassCallingDetailByDaterange(DateTimeParams obj);
         Task<object> GetVirtualClassDetailById(long vclassId);
+
+        
+        // Participant Side : VClass Related Interfaces
+        Task<object> GetInvitationListByParticipantId(string participantId);
+        Task<object> JoinVirtualClassByParticipant(VClassDetail vClassDetail);
+        Task<object> EndVirtualClassByParticipant(VClassDetail vClassDetail);
+
+
+        // Test Services
         Task<object> TestApi();
+
+
+
 
     }
 }

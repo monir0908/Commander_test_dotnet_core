@@ -209,9 +209,9 @@ namespace Commander.Common{
                 // Checking if 'tempStart--tempEnd' range intersects with 'loopStart---loopEnd' range
                 if((tempStart <= loopEnd) && (loopStart <=tempEnd))
                 {
-                    Console.WriteLine("=====================================================================");
-                    Console.WriteLine("# '" + tempStart + "' ---- '" + tempEnd + "' intersects with '" + loopStart + "' ----- '" + loopEnd + "'");
-                    Console.WriteLine();
+                    // Console.WriteLine("=====================================================================");
+                    // Console.WriteLine("# '" + tempStart + "' ---- '" + tempEnd + "' intersects with '" + loopStart + "' ----- '" + loopEnd + "'");
+                    // Console.WriteLine();
                     
 
 
@@ -221,9 +221,9 @@ namespace Commander.Common{
                     
                     tempEnd = loopEnd;
 
-                    Console.WriteLine("Next range would be : " + tempStart + " - " + tempEnd);
-                    Console.WriteLine();
-                    Console.WriteLine();
+                    // Console.WriteLine("Next range would be : " + tempStart + " - " + tempEnd);
+                    // Console.WriteLine();
+                    // Console.WriteLine();
 
 
                 }
@@ -235,14 +235,14 @@ namespace Commander.Common{
 
                     // emptySlotDuration = second range start (i.e. loopStart) - first range end (i.e. tempEnd)
 
-                    Console.WriteLine("---------------------------------------------------------------------");
-                    Console.WriteLine("Empty slot found !!!");
-                    Console.WriteLine("Empty slot is : " + tempEnd + " - " + loopStart); 
+                    // Console.WriteLine("---------------------------------------------------------------------");
+                    // Console.WriteLine("Empty slot found !!!");
+                    // Console.WriteLine("Empty slot is : " + tempEnd + " - " + loopStart); 
 
                     emptySlotDuration = loopStart - tempEnd;
-                    Console.WriteLine("Empty Slot duration is : " + emptySlotDuration );
-                    Console.WriteLine();
-                    Console.WriteLine();
+                    // Console.WriteLine("Empty Slot duration is : " + emptySlotDuration );
+                    // Console.WriteLine();
+                    // Console.WriteLine();
 
                     // Since empty slot is found, we can set next range as the follwoing                                        
                     tempStart = loopStart;
@@ -262,10 +262,10 @@ namespace Commander.Common{
             // Finding out actual call duration 
                 actualCallDuration = participantsCallDuration - totalEmptySlotDuration;
 
-                Console.WriteLine("----------FINAL RESULT-----------------");
-                Console.WriteLine("Total Empty Slot Duration is : " + totalEmptySlotDuration );
-                Console.WriteLine("Actual Call Duration is : " + actualCallDuration );
-                Console.WriteLine("---------------------------------------");   
+                // Console.WriteLine("----------FINAL RESULT-----------------");
+                // Console.WriteLine("Total Empty Slot Duration is : " + totalEmptySlotDuration );
+                // Console.WriteLine("Actual Call Duration is : " + actualCallDuration );
+                // Console.WriteLine("---------------------------------------");   
 
 
             return new CallDurationHistory(){
@@ -278,111 +278,7 @@ namespace Commander.Common{
             };
         }
 
-        // public void TakeActionsWhenCallGetDisconnected(string connectionId){
-            
-
-        //     //Console.WriteLine("NOTE:====================================================JUST DISCONNECTED SOCKETID : " + connectionId);
-
-        //     ConferenceHistory confHistoryObj = _context.ConferenceHistory.Where(x =>x.ConnectionId == connectionId ).Select(x => x).OrderByDescending(x=> x.Id).FirstOrDefault();
-
-            
-
-        //     if(confHistoryObj == null){
-
-        //         //Console.WriteLine("NOTE: NO CONFERENCE FOUND WITH THIS SOCKET ID :" + connectionId);
-        //         return base.OnDisconnectedAsync(exception);
-
-        //     }
-
-        //     // Note: if confHistoryObj is not null then we can find who got disconnected through its connectionid (i.e. socketId)
-        //     else{                
-
-        //         //Scenario 01: Host got disconnected
-        //         if(confHistoryObj.HostId !=null){                    
-
-        //             Console.WriteLine("######################################################################################");    
-        //             Console.WriteLine("JUST DISCONNECTED SOCKETID : " + connectionId);
-        //             Console.WriteLine("Host '" + confHistoryObj.HostId + "' got disconnected");
-
-
-        //             //NOTE: 'LeaveDateTime' property is null means, an on-going meeting exits and need to update property.
-        //             if(confHistoryObj.LeaveDateTime == null){
-
-        //                 //Step 01: Update 'LeaveDateTime' property on ConferenceHistory Table if 'LeaveDateTime' property is empty
-        //                 confHistoryObj.LeaveDateTime = DateTime.UtcNow;
-        //                 _context.SaveChanges();
-        //                 Console.WriteLine("1. 'LeaveDateTime' updated for Host.");
-
-
-        //                 //Step 02: Update 'Status' property on Conference Table
-        //                 Conference confObj = _context.Conference.Where(co => co.Id == confHistoryObj.ConferenceId).Select(x=>x).FirstOrDefault();
-        //                 confObj.Status = "Closed";
-        //                 confObj.HasJoinedByHost = false;
-        //                 confObj.HasJoinedByParticipant = false;
-        //                 _context.SaveChanges();
-
-
-        //                 Console.WriteLine("3. Conference status changed to 'Closed' for entire conference");
-        //                 Console.WriteLine("4. Now, Host needs to end participant's session too. Finding partner's id.. .. ..");
-        //                 Console.WriteLine("5. Host's partner/participant Id is : "+ confObj.ParticipantId);
-
-
-
-        //                 //Step 01: This time Update PARTICIPANT's 'LeaveDateTime' property on ConferenceHistory Table to end participant session too.
-        //                 ConferenceHistory confHistoryObj2 = _context.ConferenceHistory
-        //                 .Where(co => co.ConferenceId == confObj.Id && co.ParticipantId == confObj.ParticipantId)
-        //                 .Select(x=>x).OrderByDescending(x=> x.Id)
-        //                 .FirstOrDefault();
-                        
-        //                 if(confHistoryObj2.LeaveDateTime ==null){
-        //                     confHistoryObj2.LeaveDateTime = DateTime.UtcNow;
-        //                     _context.SaveChanges();
-        //                     Console.WriteLine("6. Now, 'LeaveDateTime' is updated for 'PARTICIAPNT' which is currently empty."); 
-        //                 }
-        //                 else{
-        //                     Console.WriteLine("6. 'LeaveDateTime' is NOT empty for participant; So 'LeaveDateTime' not updated again.");
-        //                 }
-                        
-        //                 // Now, signalR comes into play
-        //                 Clients.All.SendAsync("BrowserRefreshedOrInternetInteruption", confObj.ParticipantId);
-        //                 Console.WriteLine("7. Finally, alerting participant about conference termination through signalR, participant id is : " + confObj.ParticipantId);
-
-        //             }
-                    
-        //             else
-        //             {
-        //                 Console.WriteLine("Host 'LeaveDateTime' property is already set. No action taken!");
-        //             }
-        //         }
-
-        //         //Scenario 02: Participant got disconnected
-        //         else if(confHistoryObj.ParticipantId != null){                    
-
-        //             Console.WriteLine("######################################################################################");
-        //             Console.WriteLine("DISCONNECTED SOCKETID : " + connectionId);
-        //             Console.WriteLine("Participant '" + confHistoryObj.ParticipantId + "' got disconnected");
-
-
-                    
-        //             //Step 01: Update 'LeaveDateTime' property on ConferenceHistory Table if 'LeaveDateTime' property is empty
-        //             if(confHistoryObj.LeaveDateTime == null){                
-        //                 confHistoryObj.LeaveDateTime = DateTime.UtcNow;
-        //                 _context.SaveChanges();
-        //                 Console.WriteLine("I am participant and my 'LeaveDateTime' is empty, so it is updated now.");
-
-
-        //                 Conference confObj = _context.Conference.Where(co => co.Id == confHistoryObj.ConferenceId).Select(x=>x).FirstOrDefault();
-        //                 confObj.HasJoinedByParticipant = false;
-        //                 _context.SaveChanges();                
-        //             }
-        //             else
-        //             {                
-        //                 Console.WriteLine("I am participant and my 'LeaveDateTime' property is already set. No action taken!");
-        //             }
-                    
-        //         }
-        //     }
-        // }
+        
 
         
 
