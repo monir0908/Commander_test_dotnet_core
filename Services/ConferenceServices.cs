@@ -475,7 +475,7 @@ namespace Commander.Services{
                 var query = _context.ProjectBatch.Where(x => x.ProjectId == projectId).AsQueryable();
                 var data = await query.OrderBy(x => x.Id).Select(x => new
                 {
-                    x.Id,
+                    Id = x.BatchId,
                     x.Batch.BatchName,
                 }).ToListAsync();
 

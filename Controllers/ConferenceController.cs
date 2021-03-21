@@ -125,27 +125,6 @@ namespace Commander.Controllers
         {
             return Ok(await _services.TestApi());
         }
-
-
-
-
-
-
-        
-
-        
-
-        
-
-        
-
-        
-        
-
-        
-
-        
-
         
 
 

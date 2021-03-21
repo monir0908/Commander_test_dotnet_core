@@ -70,7 +70,10 @@ namespace Commander
             services.AddMvc()
             .AddJsonOptions(opts => opts.JsonSerializerOptions.PropertyNamingPolicy = null);
 
-            services.AddScoped<IConferenceServices, ConferenceServices>();
+            services
+            .AddScoped<IConferenceServices, ConferenceServices>()
+            .AddScoped<IMasterSettingServices, MasterSettingServices>()
+            ;
 
             
             services.AddSignalR();

@@ -22,8 +22,14 @@ namespace Commander{
     }
 
     public class ParticipantList
-    {        
-
+    {   
         public string Id{ get; set; }
+    }
+
+
+    public class Pagination
+    {   
+        public int Size{ get; set; }
+        public int PageNumber{ get; set; }
     }
 }
