@@ -380,6 +380,45 @@ namespace Commander.Services{
             }
         }
 
+        public async Task<object> MergeProjectBatchHostParticipant(long projectId, long batchId, string hostId, IEnumerable<ParticipantList> participantList)
+        {
+            
+            
+            try
+            {
+                
+                long projectBatchhostId = _context.ProjectBatchHost.Where(x => x.ProjectId == projectId && x.BatchId == batchId && x.HostId == hostId).Select(x => x.Id).FirstOrDefault();
+                
+                
+                foreach (var item in participantList)
+                {
+                    ProjectBatchHostParticipant obj = new ProjectBatchHostParticipant();
+                    obj.ProjectBatchHostId = projectBatchhostId;
+                    obj.CreatedDateTime = DateTime.UtcNow;
+                    obj.ParticipantId = item.Id;
+                    _context.ProjectBatchHostParticipant.Add(obj); 
+                }
+
+                await _context.SaveChangesAsync();
+
+                return new
+                {
+                    Success = true,
+                    Message = "Successfully Merged",
+                };
+                
+            }
+            catch (Exception ex)
+            {
+                
+                return new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                };
+            }
+        }
+
         public async Task<object> GetHostList(int size, int pageNumber)
         {
 
@@ -397,6 +436,44 @@ namespace Commander.Services{
                     x.Email,
                 })
                 .Skip(pageNumber * size).Take(size)
+                .ToListAsync();
+
+                var count = data.Count;
+
+                return new
+                {
+                    Success = true,
+                    Records = data,
+                    Total = count
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    Success = false,
+                    ex.Message
+                };
+            }
+        }
+
+        public async Task<object> GetHostListByProjectId(long projectId)
+        {
+
+            try
+            {
+                string [] hostIds = _context.ProjectBatchHost.Where(x => x.ProjectId == projectId).Distinct().Select(x => x.HostId).ToArray();
+                var data = await _context.Users
+                .Where(x => hostIds.Contains(x.Id) && x.UserType == "Host")              
+                .Select(x => new
+                {
+                    x.Id,
+                    x.FirstName,
+                    x.LastName,
+                    x.PhoneNumber,
+                    x.Email,
+                })
                 .ToListAsync();
 
                 var count = data.Count;
@@ -461,7 +538,7 @@ namespace Commander.Services{
             }
         }
 
-        public async Task<object> GetAlreadyMergeableHostList(long projectId, long batchId, int size, int pageNumber)
+        public async Task<object> GetAlreadyMergedHostList(long projectId, long batchId, int size, int pageNumber)
         {
 
             try
@@ -542,8 +619,103 @@ namespace Commander.Services{
             }
         }
 
+        public async Task<object> GetMergeableParticipantList(long projectId, long batchId, string hostId, int size, int pageNumber)
+        {
 
-         
+            try
+            {
+                long [] projectBatchHostIds = _context.ProjectBatchHost.Where(x => x.ProjectId == projectId && x.BatchId == batchId && x.HostId == hostId).Select(x => x.Id).ToArray();
+                string [] participantIds = 
+                _context.
+                ProjectBatchHostParticipant
+                .Where(x => projectBatchHostIds.Contains(x.ProjectBatchHostId))
+                .Select(x => x.ParticipantId)
+                .ToArray();
+                
+                var data = await _context.Users
+                .Where(x => !participantIds.Contains(x.Id) && x.UserType == "Participant")              
+                .Select(x => new
+                {
+                    x.Id,
+                    x.FirstName,
+                    x.LastName,
+                    x.PhoneNumber,
+                    x.Email,
+                    x.ImagePath
+                })
+                .OrderBy(x => x.Id)
+                .Skip(pageNumber * size).Take(size)
+                .ToListAsync();
+
+                var count = data.Count;
+
+                return new
+                {
+                    Success = true,
+                    Records = data,
+                    Total = count
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    Success = false,
+                    ex.Message
+                };
+            }
+        }
+
+        public async Task<object> GetAlreadyMergedParticipantList(long projectId, long batchId, string hostId, int size, int pageNumber)
+        {
+
+            try
+            {
+                long [] projectBatchHostIds = _context.ProjectBatchHost.Where(x => x.ProjectId == projectId && x.BatchId == batchId && x.HostId == hostId).Select(x => x.Id).ToArray();
+                string [] participantIds = 
+                _context.
+                ProjectBatchHostParticipant
+                .Where(x => projectBatchHostIds.Contains(x.ProjectBatchHostId))
+                .Select(x => x.ParticipantId)
+                .ToArray();
+                
+                var data = await _context.Users
+                .Where(x => participantIds.Contains(x.Id) && x.UserType == "Participant")              
+                .Select(x => new
+                {
+                    x.Id,
+                    x.FirstName,
+                    x.LastName,
+                    x.PhoneNumber,
+                    x.Email,
+                    x.ImagePath
+                })
+                .OrderBy(x => x.Id)
+                .Skip(pageNumber * size).Take(size)
+                .ToListAsync();
+
+                var count = data.Count;
+
+                return new
+                {
+                    Success = true,
+                    Records = data,
+                    Total = count
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    Success = false,
+                    ex.Message
+                };
+            }
+        }
+
+        
     }
 }
 

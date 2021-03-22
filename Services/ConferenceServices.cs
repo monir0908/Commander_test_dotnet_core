@@ -535,25 +535,106 @@ namespace Commander.Services{
             
         }
         
+        public async Task<object> GetVirtualClassCallingDetailByHostId(string hostId)
+        {
+            Helpers h = new Helpers(_context);
+
+            var data =  await _context.VClassDetail
+            .Where(cs => cs.HostId == hostId)
+            .Select(cs => new{
+                    Id = cs.VClassId,
+                    cs.RoomId,
+                    cs.HostId,
+                    HostFirstName = cs.Host.FirstName,
+                    // cs.ParticipantId,
+                    // ParticipantFirstName = cs.Participant.FirstName,
+                    VirtualClassDetail = h.GetActualCallDurationBetweenHostAndParticipant(cs.VClassId),
+            }).ToListAsync(); 
+            
+            
+
+            return new
+            {
+                Success = true,
+                Records = data
+            };
+            
+        }
+
+        public async Task<object> GetVirtualClassCallingDetailByHostIdAndDateRange(string hostId, DateTime startDate, DateTime endDate)
+        {
+
+            Console.WriteLine("startDate from front end :");
+            Console.WriteLine(startDate);
+
+            Console.WriteLine("endDate from front end :");
+            Console.WriteLine(endDate);
+
+
+            var fromDate = startDate;
+            var toDate = endDate;
+            toDate = endDate.AddDays(1).AddTicks(-1);
+
+            // Console.WriteLine(fromDate);
+            // Console.WriteLine(toDate);
+            Helpers h = new Helpers(_context);
+
+            var data =  await _context.VClassDetail
+            .Where(cs => cs.JoinTime >= fromDate && cs.LeaveTime <= toDate && cs.HostId == hostId)
+            .Select(cs => new{
+                    Id = cs.VClassId,
+                    cs.RoomId,
+                    cs.HostId,
+                    HostFirstName = cs.Host.FirstName,
+                    // cs.ParticipantId,
+                    // ParticipantFirstName = cs.Participant.FirstName,
+                    VirtualClassDetail = h.GetActualCallDurationBetweenHostAndParticipant(cs.VClassId),
+            }).ToListAsync(); 
+            
+            
+
+            return new
+            {
+                Success = true,
+                Records = data
+            };
+            
+        }
+        
+
         public async Task<object> GetVirtualClassDetailById(long vclassId)
         {
 
             Helpers h = new Helpers(_context);
 
             var data =  await _context.VClass
-            .Where(cs => cs.Id == vclassId)
-            .Select(cs => new{
-                    cs.Id,
-                    cs.RoomId,
-                    cs.HostId,
-                    HostFirstName = cs.Host.FirstName,
-                    cs.HostCallDuration,
-                    cs.ParticipantsCallDuration,
-                    cs.EmptySlotDuration,
-                    cs.ActualCallDuration,
-                    cs.ParticipantJoined,
-                    cs.UniqueParticipantCounts,
-            }).ToListAsync(); 
+            .Where(v => v.Id == vclassId)
+            .Select(v => new{
+                    v.Id,
+                    v.RoomId,
+                    v.HostId,
+                    HostFirstName = v.Host.FirstName,
+                    HostLastName = v.Host.LastName,
+                    HostEmail = v.Host.Email,
+                    v.HostCallDuration,
+                    v.ParticipantsCallDuration,
+                    v.EmptySlotDuration,
+                    v.ActualCallDuration,
+                    v.ParticipantJoined,
+                    v.UniqueParticipantCounts,
+
+                    VirtualClassDetail = _context.VClassDetail.Where(vd => vd.VClassId == v.Id)
+                    .Select(vd => new{
+                        vd.Id,
+                        vd.HostId,
+                        HostFirstName = vd.Host.FirstName,
+                        HostLastName = vd.Host.LastName,
+                        ParticipantFirstName = vd.Participant.FirstName,
+                        ParticipantLastName = vd.Participant.LastName,
+                        vd.JoinTime,
+                        vd.LeaveTime
+                    }).ToList(),
+            }).FirstOrDefaultAsync(); 
 
             return new
             {

@@ -6,6 +6,7 @@ using Commander.Models;
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using System.Linq;
+using System;
 
 namespace Commander.Controllers
 {
@@ -86,6 +87,18 @@ namespace Commander.Controllers
         public async Task<IActionResult> GetVirtualClassCallingDetailByDaterange(DateTimeParams obj)
         {
             return Ok(await _services.GetVirtualClassCallingDetailByDaterange(obj));
+        }
+
+        [HttpGet, Route("GetVirtualClassCallingDetailByHostId/{hostId}")]
+        public async Task<IActionResult> GetVirtualClassCallingDetailByHostId(string hostId)
+        {
+            return Ok(await _services.GetVirtualClassCallingDetailByHostId(hostId));
+        }
+
+        [HttpGet, Route("GetVirtualClassCallingDetailByHostIdAndDateRange")]
+        public async Task<IActionResult> GetVirtualClassCallingDetailByHostIdAndDateRange(string hostId, DateTime startDate, DateTime endDate)
+        {
+            return Ok(await _services.GetVirtualClassCallingDetailByHostIdAndDateRange(hostId, startDate, endDate));
         }
 
         [HttpGet, Route("GetVirtualClassDetailById/{vclassId}")]

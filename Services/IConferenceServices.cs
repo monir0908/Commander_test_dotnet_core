@@ -26,6 +26,8 @@ namespace Commander.Services{
         // Host Side: Miscellaneous Interfaces
         Task<object> GetBatchListByProjectId(long projectId);
         Task<object> GetVirtualClassCallingDetailByDaterange(DateTimeParams obj);
+        Task<object> GetVirtualClassCallingDetailByHostId(string hostId);
+        Task<object> GetVirtualClassCallingDetailByHostIdAndDateRange(string hostId, DateTime startDate, DateTime endDate);
         Task<object> GetVirtualClassDetailById(long vclassId);
 
         

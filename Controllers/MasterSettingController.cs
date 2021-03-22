@@ -29,6 +29,12 @@ namespace Commander.Controllers
         {
             return Ok(await _services.GetProjectList(size,pageNumber));
         }
+        
+        [HttpGet, Route("GetHostListByProjectId/{projectId:long}")]
+        public async Task<IActionResult> GetHostListByProjectId(long projectId)
+        {
+            return Ok(await _services.GetHostListByProjectId(projectId));
+        }
 
         [HttpGet, Route("GetProjectDetailById/{projectId:long}")]
         public async Task<IActionResult> GetProjectDetailById(long projectId)
@@ -84,6 +90,21 @@ namespace Commander.Controllers
             return Ok(await _services.MergeProjectBatchHost(models));
         }
 
+        [HttpPost, Route("MergeProjectBatchHostParticipant")]
+        public async Task<IActionResult> JoinVirtualClassByHost(JObject objData)
+        {
+            dynamic jsonData = objData;
+            
+
+            long projectId = jsonData.projectId;
+            long batchId = jsonData.batchId;
+            string hostId = jsonData.hostId;
+
+            JArray participantListJson = jsonData.participantList;
+            var participantList = participantListJson.Select(item => item.ToObject<ParticipantList>()).ToList();
+            return Ok(await _services.MergeProjectBatchHostParticipant(projectId, batchId, hostId, participantList));
+        }
+
         [HttpGet, Route("GetHostList")]
         public async Task<IActionResult> GetHostList(int size, int pageNumber)
         {
@@ -96,16 +117,28 @@ namespace Commander.Controllers
             return Ok(await _services.GetMergeableHostList(projectId, batchId, size,pageNumber));
         }
 
-        [HttpGet, Route("GetAlreadyMergeableHostList/{projectId:long}/{batchId:long}")]
-        public async Task<IActionResult> GetAlreadyMergeableHostList(long projectId, long batchId, int size, int pageNumber)
+        [HttpGet, Route("GetAlreadyMergedHostList/{projectId:long}/{batchId:long}")]
+        public async Task<IActionResult> GetAlreadyMergedHostList(long projectId, long batchId, int size, int pageNumber)
         {
-            return Ok(await _services.GetAlreadyMergeableHostList(projectId, batchId, size,pageNumber));
+            return Ok(await _services.GetAlreadyMergedHostList(projectId, batchId, size,pageNumber));
         }
 
         [HttpGet, Route("GetParticipantList")]
         public async Task<IActionResult> GetParticipantList(int size, int pageNumber)
         {
             return Ok(await _services.GetParticipantList(size,pageNumber));
+        }
+
+        [HttpGet, Route("GetMergeableParticipantList/{projectId:long}/{batchId:long}/{hostId}")]
+        public async Task<IActionResult> GetMergeableParticipantList(long projectId, long batchId, string hostId, int size, int pageNumber)
+        {
+            return Ok(await _services.GetMergeableParticipantList(projectId, batchId, hostId, size,pageNumber));
+        }
+
+        [HttpGet, Route("GetAlreadyMergedParticipantList/{projectId:long}/{batchId:long}/{hostId}")]
+        public async Task<IActionResult> GetAlreadyMergedParticipantList(long projectId, long batchId, string hostId, int size, int pageNumber)
+        {
+            return Ok(await _services.GetAlreadyMergedParticipantList(projectId, batchId, hostId, size,pageNumber));
         }
 
 
