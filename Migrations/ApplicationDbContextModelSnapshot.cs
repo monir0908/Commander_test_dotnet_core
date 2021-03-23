@@ -50,6 +50,12 @@ namespace Commander.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsAdmin")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSuperUser")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("LastLogOn")
                         .HasColumnType("datetime2");
 
@@ -346,6 +352,9 @@ namespace Commander.Migrations
                     b.Property<TimeSpan?>("ParticipantsCallDuration")
                         .HasColumnType("time");
 
+                    b.Property<long>("ProjectId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("RoomId")
                         .HasMaxLength(750)
                         .HasColumnType("nvarchar(750)");
@@ -365,6 +374,8 @@ namespace Commander.Migrations
                     b.HasIndex("BatchId");
 
                     b.HasIndex("HostId");
+
+                    b.HasIndex("ProjectId");
 
                     b.ToTable("VClass");
                 });
@@ -395,6 +406,9 @@ namespace Commander.Migrations
                     b.Property<string>("ParticipantId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<long>("ProjectId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("RoomId")
                         .HasMaxLength(750)
                         .HasColumnType("nvarchar(750)");
@@ -409,6 +423,8 @@ namespace Commander.Migrations
                     b.HasIndex("HostId");
 
                     b.HasIndex("ParticipantId");
+
+                    b.HasIndex("ProjectId");
 
                     b.ToTable("VClassDetail");
                 });
@@ -432,6 +448,9 @@ namespace Commander.Migrations
                     b.Property<string>("ParticipantId")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<long>("ProjectId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("RoomId")
                         .HasMaxLength(750)
                         .HasColumnType("nvarchar(750)");
@@ -450,6 +469,8 @@ namespace Commander.Migrations
                     b.HasIndex("HostId");
 
                     b.HasIndex("ParticipantId");
+
+                    b.HasIndex("ProjectId");
 
                     b.ToTable("VClassInvitation");
                 });
@@ -711,9 +732,17 @@ namespace Commander.Migrations
                         .HasForeignKey("HostId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Commander.Models.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Batch");
 
                     b.Navigation("Host");
+
+                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("Commander.Models.VClassDetail", b =>
@@ -734,11 +763,19 @@ namespace Commander.Migrations
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Commander.Models.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Batch");
 
                     b.Navigation("Host");
 
                     b.Navigation("Participant");
+
+                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("Commander.Models.VClassInvitation", b =>
@@ -759,11 +796,19 @@ namespace Commander.Migrations
                         .HasForeignKey("ParticipantId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Commander.Models.Project", "Project")
+                        .WithMany()
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Batch");
 
                     b.Navigation("Host");
 
                     b.Navigation("Participant");
+
+                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -22,6 +22,8 @@ namespace Commander.Models
         public bool IsActive { get; set; }
         public DateTime? DeActivateOn { get; set; }
         public string ImagePath { get; set; }
+        public bool IsAdmin { get; set; }
+        public bool IsSuperUser { get; set; }
 
         [NotMapped]
         public virtual IIdentity Identity { get; set; }

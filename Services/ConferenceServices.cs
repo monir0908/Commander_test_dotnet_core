@@ -59,6 +59,7 @@ namespace Commander.Services{
                 viObj.RoomId = vClassDetail.RoomId ;
                 viObj.BatchId = vClassDetail.BatchId ;
                 viObj.HostId = vClassDetail.HostId ;
+                viObj.ProjectId = vClassDetail.ProjectId ;
                 viObj.InvitationDateTime = DateTime.UtcNow;
                 viObj.Status = "Invited";
                 viObj.ParticipantId = item.Id;
@@ -229,6 +230,9 @@ namespace Commander.Services{
 
         public async Task<object> CreateVirtualClass(VClass vClassObj)
         {
+            Console.WriteLine(vClassObj.ProjectId);
+            Console.WriteLine(vClassObj.BatchId);
+            Console.WriteLine(vClassObj.HostId);
             
             try
             {
@@ -275,6 +279,8 @@ namespace Commander.Services{
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.InnerException.Message);
+
                 return new
                 {
                     Success = false,
@@ -564,11 +570,11 @@ namespace Commander.Services{
         public async Task<object> GetVirtualClassCallingDetailByHostIdAndDateRange(string hostId, DateTime startDate, DateTime endDate)
         {
 
-            Console.WriteLine("startDate from front end :");
-            Console.WriteLine(startDate);
+            // Console.WriteLine("startDate from front end :");
+            // Console.WriteLine(startDate);
 
-            Console.WriteLine("endDate from front end :");
-            Console.WriteLine(endDate);
+            // Console.WriteLine("endDate from front end :");
+            // Console.WriteLine(endDate);
 
 
             var fromDate = startDate;
@@ -586,6 +592,8 @@ namespace Commander.Services{
                     cs.RoomId,
                     cs.HostId,
                     HostFirstName = cs.Host.FirstName,
+                    cs.JoinTime,
+                    cs.LeaveTime,
                     // cs.ParticipantId,
                     // ParticipantFirstName = cs.Participant.FirstName,
                     VirtualClassDetail = h.GetActualCallDurationBetweenHostAndParticipant(cs.VClassId),
@@ -662,6 +670,7 @@ namespace Commander.Services{
                     x.VClassId,
                     x.RoomId,
                     x.ParticipantId,
+                    x.ProjectId,
                     x.HostId,
                     HostFirstName= x.Host.FirstName,
                     HostLastName= x.Host.LastName,

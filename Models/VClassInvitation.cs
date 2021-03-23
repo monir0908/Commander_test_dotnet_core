@@ -11,6 +11,10 @@ namespace Commander.Models{
         [StringLength(750)]
         public string RoomId { get; set; }
 
+        [ForeignKey("ProjectId")]
+        public virtual Project Project { get; set; }
+        public long ProjectId { get; set; }
+
         [ForeignKey("BatchId")]
         public virtual Batch Batch { get; set; }
         public long BatchId { get; set; }

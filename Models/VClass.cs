@@ -14,9 +14,14 @@ namespace Commander.Models{
         public virtual ApplicationUser Host { get; set; }
         public string HostId { get; set; }
 
+        [ForeignKey("ProjectId")]
+        public virtual Project Project { get; set; }
+        public long ProjectId { get; set; }
+
         [ForeignKey("BatchId")]
         public virtual Batch Batch { get; set; }
         public long BatchId { get; set; }
+        
 
         public DateTime? CreatedDateTime { get; set; }
 

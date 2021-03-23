@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Commander.Migrations
 {
-    public partial class _18March : Migration
+    public partial class UserTable : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -33,6 +33,8 @@ namespace Commander.Migrations
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     DeActivateOn = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsAdmin = table.Column<bool>(type: "bit", nullable: false),
+                    IsSuperUser = table.Column<bool>(type: "bit", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -257,6 +259,33 @@ namespace Commander.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProjectBatch",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProjectId = table.Column<long>(type: "bigint", nullable: false),
+                    BatchId = table.Column<long>(type: "bigint", nullable: false),
+                    CreatedDateTime = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectBatch", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProjectBatch_Batch_BatchId",
+                        column: x => x.BatchId,
+                        principalTable: "Batch",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ProjectBatch_Project_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Project",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "VClass",
                 columns: table => new
                 {
@@ -264,6 +293,7 @@ namespace Commander.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     RoomId = table.Column<string>(type: "nvarchar(750)", maxLength: 750, nullable: true),
                     HostId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    ProjectId = table.Column<long>(type: "bigint", nullable: false),
                     BatchId = table.Column<long>(type: "bigint", nullable: false),
                     CreatedDateTime = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ScheduleDateTime = table.Column<DateTime>(type: "datetime2", nullable: true),
@@ -290,6 +320,12 @@ namespace Commander.Migrations
                         principalTable: "Batch",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_VClass_Project_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Project",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -300,6 +336,7 @@ namespace Commander.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     VClassId = table.Column<long>(type: "bigint", nullable: false),
                     RoomId = table.Column<string>(type: "nvarchar(750)", maxLength: 750, nullable: true),
+                    ProjectId = table.Column<long>(type: "bigint", nullable: false),
                     BatchId = table.Column<long>(type: "bigint", nullable: false),
                     HostId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     ParticipantId = table.Column<string>(type: "nvarchar(450)", nullable: true),
@@ -328,6 +365,12 @@ namespace Commander.Migrations
                         principalTable: "Batch",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_VClassDetail_Project_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Project",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -338,6 +381,7 @@ namespace Commander.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     VClassId = table.Column<long>(type: "bigint", nullable: false),
                     RoomId = table.Column<string>(type: "nvarchar(750)", maxLength: 750, nullable: true),
+                    ProjectId = table.Column<long>(type: "bigint", nullable: false),
                     BatchId = table.Column<long>(type: "bigint", nullable: false),
                     HostId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     ParticipantId = table.Column<string>(type: "nvarchar(450)", nullable: true),
@@ -365,29 +409,8 @@ namespace Commander.Migrations
                         principalTable: "Batch",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ProjectBatch",
-                columns: table => new
-                {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    ProjectId = table.Column<long>(type: "bigint", nullable: false),
-                    BatchId = table.Column<long>(type: "bigint", nullable: false),
-                    CreatedDateTime = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ProjectBatch", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProjectBatch_Batch_BatchId",
-                        column: x => x.BatchId,
-                        principalTable: "Batch",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_ProjectBatch_Project_ProjectId",
+                        name: "FK_VClassInvitation_Project_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Project",
                         principalColumn: "Id",
@@ -401,6 +424,8 @@ namespace Commander.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ProjectBatchId = table.Column<long>(type: "bigint", nullable: false),
+                    ProjectId = table.Column<long>(type: "bigint", nullable: false),
+                    BatchId = table.Column<long>(type: "bigint", nullable: false),
                     HostId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     CreatedDateTime = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
@@ -411,6 +436,18 @@ namespace Commander.Migrations
                         name: "FK_ProjectBatchHost_AspNetUsers_HostId",
                         column: x => x.HostId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ProjectBatchHost_Batch_BatchId",
+                        column: x => x.BatchId,
+                        principalTable: "Batch",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ProjectBatchHost_Project_ProjectId",
+                        column: x => x.ProjectId,
+                        principalTable: "Project",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -523,6 +560,11 @@ namespace Commander.Migrations
                 column: "ProjectId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProjectBatchHost_BatchId",
+                table: "ProjectBatchHost",
+                column: "BatchId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProjectBatchHost_HostId",
                 table: "ProjectBatchHost",
                 column: "HostId");
@@ -531,6 +573,11 @@ namespace Commander.Migrations
                 name: "IX_ProjectBatchHost_ProjectBatchId",
                 table: "ProjectBatchHost",
                 column: "ProjectBatchId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectBatchHost_ProjectId",
+                table: "ProjectBatchHost",
+                column: "ProjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectBatchHostParticipant_ParticipantId",
@@ -553,6 +600,11 @@ namespace Commander.Migrations
                 column: "HostId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_VClass_ProjectId",
+                table: "VClass",
+                column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_VClassDetail_BatchId",
                 table: "VClassDetail",
                 column: "BatchId");
@@ -568,6 +620,11 @@ namespace Commander.Migrations
                 column: "ParticipantId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_VClassDetail_ProjectId",
+                table: "VClassDetail",
+                column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_VClassInvitation_BatchId",
                 table: "VClassInvitation",
                 column: "BatchId");
@@ -581,6 +638,11 @@ namespace Commander.Migrations
                 name: "IX_VClassInvitation_ParticipantId",
                 table: "VClassInvitation",
                 column: "ParticipantId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_VClassInvitation_ProjectId",
+                table: "VClassInvitation",
+                column: "ProjectId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
