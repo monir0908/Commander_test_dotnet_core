@@ -613,7 +613,8 @@ namespace Commander.Services{
                     cs.Project.ProjectName,
                     cs.BatchId,
                     cs.Batch.BatchName,
-                    //HostFirstName = cs.Host.FirstName,
+                    HostFirstName = cs.Host.FirstName,
+                    HostLastName = cs.Host.LastName,
                     cs.JoinTime,
                     cs.LeaveTime,
                     // cs.ParticipantId,
@@ -648,6 +649,8 @@ namespace Commander.Services{
                     HostFirstName = v.Host.FirstName,
                     HostLastName = v.Host.LastName,
                     HostEmail = v.Host.Email,
+                    HostImagePath = v.Host.ImagePath,
+                    
                     v.HostCallDuration,
                     v.ParticipantsCallDuration,
                     v.EmptySlotDuration,
