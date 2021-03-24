@@ -73,6 +73,7 @@ namespace Commander
             services
             .AddScoped<IConferenceServices, ConferenceServices>()
             .AddScoped<IMasterSettingServices, MasterSettingServices>()
+            .AddScoped<IUserServices, UserServices>()
             ;
 
             
