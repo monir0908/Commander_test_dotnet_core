@@ -95,10 +95,10 @@ namespace Commander.Controllers
             return Ok(await _services.GetVirtualClassCallingDetailByHostId(hostId));
         }
 
-        [HttpGet, Route("GetVirtualClassCallingDetailByHostIdAndDateRange")]
-        public async Task<IActionResult> GetVirtualClassCallingDetailByHostIdAndDateRange(string hostId, DateTime startDate, DateTime endDate)
+        [HttpGet, Route("GetVirtualClassCallingDetail")]
+        public async Task<IActionResult> GetVirtualClassCallingDetail(long projectId, long batchId, string hostId, DateTime startDate, DateTime endDate)
         {
-            return Ok(await _services.GetVirtualClassCallingDetailByHostIdAndDateRange(hostId, startDate, endDate));
+            return Ok(await _services.GetVirtualClassCallingDetail(projectId, batchId, hostId, startDate, endDate));
         }
 
         [HttpGet, Route("GetVirtualClassDetailById/{vclassId}")]
@@ -134,9 +134,9 @@ namespace Commander.Controllers
         // Test Endpoints
 
         [HttpGet, Route("TestApi")]
-        public async Task<IActionResult> TestApi()
+        public async Task<IActionResult> TestApi(long projectId, long batchId, string hostId, DateTime startDate, DateTime endDate)
         {
-            return Ok(await _services.TestApi());
+            return Ok(await _services.TestApi(projectId, batchId, hostId, startDate, endDate));
         }
         
 

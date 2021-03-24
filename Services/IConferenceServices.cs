@@ -27,7 +27,7 @@ namespace Commander.Services{
         Task<object> GetBatchListByProjectId(long projectId);
         Task<object> GetVirtualClassCallingDetailByDaterange(DateTimeParams obj);
         Task<object> GetVirtualClassCallingDetailByHostId(string hostId);
-        Task<object> GetVirtualClassCallingDetailByHostIdAndDateRange(string hostId, DateTime startDate, DateTime endDate);
+        Task<object> GetVirtualClassCallingDetail(long projectId, long batchId, string hostId, DateTime startDate, DateTime endDate);
         Task<object> GetVirtualClassDetailById(long vclassId);
 
         
@@ -38,7 +38,7 @@ namespace Commander.Services{
 
 
         // Test Services
-        Task<object> TestApi();
+        Task<object> TestApi(long projectId, long batchId, string hostId, DateTime startDate, DateTime endDate);
 
 
 

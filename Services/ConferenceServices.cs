@@ -567,7 +567,7 @@ namespace Commander.Services{
             
         }
 
-        public async Task<object> GetVirtualClassCallingDetailByHostIdAndDateRange(string hostId, DateTime startDate, DateTime endDate)
+        public async Task<object> GetVirtualClassCallingDetail(long projectId, long batchId, string hostId, DateTime startDate, DateTime endDate)
         {
 
             // Console.WriteLine("startDate from front end :");
@@ -581,30 +581,52 @@ namespace Commander.Services{
             var toDate = endDate;
             toDate = endDate.AddDays(1).AddTicks(-1);
 
-            // Console.WriteLine(fromDate);
-            // Console.WriteLine(toDate);
+
+            // Console.WriteLine("projectId : " + projectId);
+            // Console.WriteLine("batchId : " + batchId);
+            // Console.WriteLine("hostId : " + hostId);
+            // Console.WriteLine("fromDate : " + fromDate);
+            // Console.WriteLine("toDate : " + toDate);
+
+            IQueryable<VClassDetail> query = _context.VClassDetail.Where(vcd => vcd.JoinTime >= fromDate && vcd.LeaveTime <= toDate).AsQueryable();
+            if (projectId>0)
+                query =  query.Where(vcd => vcd.ProjectId == projectId);
+            if (batchId>0)
+                query =  query.Where(vcd => vcd.BatchId == batchId);
+            if (hostId != null)
+                query = query.Where(vcd => vcd.HostId == hostId);
+            
+            // query.Where(vcd => vcd.JoinTime >= fromDate && vcd.LeaveTime <= toDate);
+       
+
+
+            
             Helpers h = new Helpers(_context);
 
-            var data =  await _context.VClassDetail
-            .Where(cs => cs.JoinTime >= fromDate && cs.LeaveTime <= toDate && cs.HostId == hostId)
+            var data =  
+            await query     
             .Select(cs => new{
                     Id = cs.VClassId,
                     cs.RoomId,
                     cs.HostId,
-                    HostFirstName = cs.Host.FirstName,
+                    cs.ProjectId,
+                    cs.BatchId,
+                    //HostFirstName = cs.Host.FirstName,
                     cs.JoinTime,
                     cs.LeaveTime,
                     // cs.ParticipantId,
                     // ParticipantFirstName = cs.Participant.FirstName,
                     VirtualClassDetail = h.GetActualCallDurationBetweenHostAndParticipant(cs.VClassId),
             }).ToListAsync(); 
+            var count = data.Count;
             
             
 
             return new
             {
                 Success = true,
-                Records = data
+                Records = data,
+                Total = count
             };
             
         }
@@ -824,25 +846,72 @@ namespace Commander.Services{
         
         // Test Services
         
-        public async Task<object> TestApi()
+        public async Task<object> TestApi(long projectId, long batchId, string hostId, DateTime startDate, DateTime endDate)
         {
 
 
-            await _context.Project.Select(c => c).ToListAsync();
+            // Console.WriteLine("startDate from front end :");
+            // Console.WriteLine(startDate);
 
-            var participantList =   _context.VClassDetail.Where(c=> c.VClassId == 1 && c.ParticipantId !=null).Select(c=> c).ToList();
+            // Console.WriteLine("endDate from front end :");
+            // Console.WriteLine(endDate);
 
-            var ids = participantList.Select(x => x.Id).ToArray();           
+
+           
+
+            var fromDate = startDate;
+            var toDate = endDate;
+            toDate = endDate.AddDays(1).AddTicks(-1);
+
+
+            Console.WriteLine("projectId : " + projectId);
+            Console.WriteLine("batchId : " + batchId);
+            Console.WriteLine("hostId : " + hostId);
+            Console.WriteLine("fromDate : " + fromDate);
+            Console.WriteLine("toDate : " + toDate);
+
+            IQueryable<VClassDetail> query = _context.VClassDetail;
+            if (projectId>0)
+                query =  query.Where(vcd => vcd.ProjectId == projectId);
+            if (batchId>0)
+                query =  query.Where(vcd => vcd.BatchId == batchId);
+            if (hostId != null)
+                query = query.Where(vcd => vcd.HostId == hostId);
+            
+       
+
+
+            
+            Helpers h = new Helpers(_context);
+
+            var data =  
+            await query         
+            .Select(cs => new{
+                    Id = cs.VClassId,
+                    cs.RoomId,
+                    cs.HostId,
+                    cs.ProjectId,
+                    cs.BatchId,
+                    HostFirstName = cs.Host.FirstName,
+                    cs.JoinTime,
+                    cs.LeaveTime,
+                    // cs.ParticipantId,
+                    // ParticipantFirstName = cs.Participant.FirstName,
+                    VirtualClassDetail = h.GetActualCallDurationBetweenHostAndParticipant(cs.VClassId),
+            }).ToListAsync(); 
+
+
+            
             
 
-
-            return new  
+            return new
             {
                 Success = true,
-                Data = ids,
+                Records = data
             };
             
         }
+        
         
     }
 }
