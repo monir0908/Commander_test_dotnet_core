@@ -864,11 +864,11 @@ namespace Commander.Services{
             toDate = endDate.AddDays(1).AddTicks(-1);
 
 
-            Console.WriteLine("projectId : " + projectId);
-            Console.WriteLine("batchId : " + batchId);
-            Console.WriteLine("hostId : " + hostId);
-            Console.WriteLine("fromDate : " + fromDate);
-            Console.WriteLine("toDate : " + toDate);
+            // Console.WriteLine("projectId : " + projectId);
+            // Console.WriteLine("batchId : " + batchId);
+            // Console.WriteLine("hostId : " + hostId);
+            // Console.WriteLine("fromDate : " + fromDate);
+            // Console.WriteLine("toDate : " + toDate);
 
             IQueryable<VClassDetail> query = _context.VClassDetail;
             if (projectId>0)
