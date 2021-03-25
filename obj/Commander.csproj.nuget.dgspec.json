@@ -1,18 +1,21 @@
 {
   "format": 1,
   "restore": {
-    "K:\\DOT-NET-CORE-PROJECTS\\signalR_dotnet_core_101\\Commander.csproj": {}
+    "C:\\MONIR-DOTNET-CORE-PROJECTS\\signalR_dotnet_core_101\\Commander.csproj": {}
   },
   "projects": {
-    "K:\\DOT-NET-CORE-PROJECTS\\signalR_dotnet_core_101\\Commander.csproj": {
+    "C:\\MONIR-DOTNET-CORE-PROJECTS\\signalR_dotnet_core_101\\Commander.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "K:\\DOT-NET-CORE-PROJECTS\\signalR_dotnet_core_101\\Commander.csproj",
+        "projectUniqueName": "C:\\MONIR-DOTNET-CORE-PROJECTS\\signalR_dotnet_core_101\\Commander.csproj",
         "projectName": "Commander",
-        "projectPath": "K:\\DOT-NET-CORE-PROJECTS\\signalR_dotnet_core_101\\Commander.csproj",
+        "projectPath": "C:\\MONIR-DOTNET-CORE-PROJECTS\\signalR_dotnet_core_101\\Commander.csproj",
         "packagesPath": "C:\\Users\\User\\.nuget\\packages\\",
-        "outputPath": "K:\\DOT-NET-CORE-PROJECTS\\signalR_dotnet_core_101\\obj\\",
+        "outputPath": "C:\\MONIR-DOTNET-CORE-PROJECTS\\signalR_dotnet_core_101\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
         "configFilePaths": [
           "C:\\Users\\User\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
@@ -93,6 +96,12 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[5.0.0, 5.0.0]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"

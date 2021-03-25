@@ -74,6 +74,9 @@ namespace Commander.Models
         public DbSet<Conference> Conference{ get; set; }
         public DbSet<ConferenceHistory> ConferenceHistory { get; set; }
 
+        public DbSet<HeadRoles> HeadRoles { get; set; }
+        public DbSet<HeadRoles_Roles> HeadRoles_Roles { get; set; }
+
         
 
 

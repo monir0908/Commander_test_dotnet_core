@@ -4,14 +4,16 @@ using Commander.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Commander.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210325103137_RoleTablesAddtion")]
+    partial class RoleTablesAddtion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -260,12 +262,15 @@ namespace Commander.Migrations
                     b.Property<long>("HeadRoleId")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("HeadRolesId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("RoleId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("HeadRoleId");
+                    b.HasIndex("HeadRolesId");
 
                     b.HasIndex("RoleId");
 
@@ -708,18 +713,17 @@ namespace Commander.Migrations
                 {
                     b.HasOne("Commander.Models.HeadRoles", "HeadRoles")
                         .WithMany()
-                        .HasForeignKey("HeadRoleId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .HasForeignKey("HeadRolesId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", "IdentityRole")
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("HeadRoles");
 
-                    b.Navigation("IdentityRole");
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("Commander.Models.ProjectBatch", b =>

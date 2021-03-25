@@ -4,14 +4,16 @@ using Commander.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Commander.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210325061753_25March")]
+    partial class _25March
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -216,7 +218,29 @@ namespace Commander.Migrations
                     b.ToTable("ConferenceHistory");
                 });
 
-            modelBuilder.Entity("Commander.Models.HeadRoles", b =>
+            modelBuilder.Entity("Commander.Models.GroupRole", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long>("RoleGroupId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleGroupId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("GroupRoles");
+                });
+
+            modelBuilder.Entity("Commander.Models.IdentityRoleGroup", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -247,29 +271,7 @@ namespace Commander.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("HeadRoles");
-                });
-
-            modelBuilder.Entity("Commander.Models.HeadRoles_Roles", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<long>("HeadRoleId")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("RoleId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("HeadRoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("HeadRoles_Roles");
+                    b.ToTable("IdentityRoleGroups");
                 });
 
             modelBuilder.Entity("Commander.Models.Project", b =>
@@ -704,22 +706,22 @@ namespace Commander.Migrations
                     b.Navigation("Participant");
                 });
 
-            modelBuilder.Entity("Commander.Models.HeadRoles_Roles", b =>
+            modelBuilder.Entity("Commander.Models.GroupRole", b =>
                 {
-                    b.HasOne("Commander.Models.HeadRoles", "HeadRoles")
+                    b.HasOne("Commander.Models.IdentityRoleGroup", "RoleGroup")
                         .WithMany()
-                        .HasForeignKey("HeadRoleId")
+                        .HasForeignKey("RoleGroupId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", "IdentityRole")
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("HeadRoles");
+                    b.Navigation("Role");
 
-                    b.Navigation("IdentityRole");
+                    b.Navigation("RoleGroup");
                 });
 
             modelBuilder.Entity("Commander.Models.ProjectBatch", b =>
