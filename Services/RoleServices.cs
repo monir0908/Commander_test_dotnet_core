@@ -27,64 +27,35 @@ namespace Commander.Services{
             this._context = context;
             this._notificationHubContext = hubContext;
         }
-
-
-
-        public async Task<object> HeadRolesCreateOrUpdate(HeadRolesModel model, IIdentity identity)
+        public async Task<object> CreateOrUpdateHeadRole(HeadRoles model, IIdentity identity)
         {
+            
             HeadRoles item = null;
-            HeadRoles_Roles role = null;
-            List<HeadRoles_Roles> roles = new List<HeadRoles_Roles>();
             bool isEdit = true;
             try
             {
                 if (await _context.HeadRoles.AnyAsync(x => x.Id != model.Id && x.Name == model.Name))
-                    throw new Exception("Already exists: " + model.Name);
+                    throw new Exception("Head Role Name already exists !");
 
-                if (model.Id > 0)
+                
+
+                if (model.Id >0)
                 {
                     item = await _context.HeadRoles.FindAsync(model.Id);
-                    if (item == null) throw new Exception("Role group not found");
-
-                    roles = await _context.HeadRoles_Roles.Where(x => x.HeadRoleId == item.Id).ToListAsync();
+                    if (item == null) throw new Exception("Head Role not found to update !");
                 }
                 else
                 {
                     item = new HeadRoles();
-                    isEdit = false;
+                    isEdit = false;                    
                 }
 
+
+               
                 item.Name = model.Name;
                 item.Description = model.Description;
-                item.NoOfRoles = model.Roles.Count;
 
-
-                var identityRoles = await _context.Roles.Where(x => model.Roles.Contains(x.Name)).ToListAsync();
-
-                foreach (var rolename in model.Roles)
-                {
-                    role = roles.FirstOrDefault();
-                    if (role == null) role = new HeadRoles_Roles();
-                    role.HeadRoleId = item.Id;
-                    role.RoleId = identityRoles.Find(x => x.Name == rolename).Id;
-
-                    if (role.Id == 0)
-                    {
-                        _context.HeadRoles_Roles.Add(role);
-                    }
-                    else
-                    {
-                        _context.Entry(role).State = EntityState.Modified;
-                        roles.RemoveAt(0);
-                    }
-                }
-
-                foreach (var HeadRoles_Roles in roles)
-                {
-                    _context.Entry(HeadRoles_Roles).State = EntityState.Deleted;
-                }
-
-                item.SetAuditTrailEntity(identity);
+                item.SetAuditTrailEntity(identity);    
 
                 using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                 {
@@ -97,18 +68,6 @@ namespace Commander.Services{
                         else
                         {
                             _context.Entry(item).State = EntityState.Modified;
-
-                            //var userIds = await _context.BPUsers.Where(x => x.HeadRoleId == item.Id && x.UserId != null).Select(x => x.UserId).ToListAsync();
-
-                            //foreach (var userId in userIds)
-                            //{
-                            //    userRoles = await usermanager.GetRolesAsync(userId);
-                            //    result = await usermanager.RemoveFromRolesAsync(userId, userRoles.ToArray());
-                            //    if (!result.Succeeded) throw new Exception("Error on user's permissions remove: " + string.Join(", ", result.Errors));
-
-                            //    result = await usermanager.AddToRolesAsync(userId, model.Roles.ToArray());
-                            //    if (!result.Succeeded) throw new Exception("Error on user's new roles add: " + string.Join(", ", result.Errors));
-                            //}
                         }
                         await _context.SaveChangesAsync();
                         scope.Complete();
@@ -130,15 +89,19 @@ namespace Commander.Services{
             }
             catch (Exception ex)
             {
+                
                 return new
                 {
                     Success = false,
-                    ex.Message
+                    Message = ex.InnerException?.Message ?? ex.Message
                 };
             }
         }
 
-        public async Task<object> GetHeadRolesList(int size, int pageNumber)
+
+        
+
+        public async Task<object> GetHeadRoleList(int size, int pageNumber)
         {
             try
             {
@@ -196,18 +159,12 @@ namespace Commander.Services{
         {
             try
             {
-                var data = await _context.HeadRoles.Where(t => t.Id == id)
-                     .GroupJoin(_context.HeadRoles_Roles, x => x.Id, y => y.HeadRoleId, (x, y) => new
-                     {
-                         HeadRoles = x,
-                         Roles = y
-                     })
+                var data = await _context.HeadRoles.Where(t => t.Id == id)                     
                 .Select(t => new
                 {
-                    t.HeadRoles.Id,
-                    t.HeadRoles.Name,
-                    t.HeadRoles.Description,
-                    Roles = t.Roles.Select(x => x.Id).ToList()
+                    t.Id,
+                    t.Name,
+                    t.Description,
                 }).FirstOrDefaultAsync();
                 return new
                 {
@@ -252,7 +209,47 @@ namespace Commander.Services{
             }
         }
 
-        public async Task<object> GetAllRoles()
+        public async Task<object> CreateRole(IdentityRole model)
+        {
+            
+            try
+            {
+
+                //Need to rewrite this piece of code
+
+                // foreach (var model in models)
+                // {
+                //     if (await _context.Roles.AnyAsync(x => x.Id != model.Id && x.Name == model.Name))
+                //     throw new Exception("One or more roles already exit !");
+                // }
+                
+
+                
+                model.Id = Guid.NewGuid().ToString();               
+                _context.Roles.Add(model);                
+
+                await _context.SaveChangesAsync();             
+                
+
+                return new
+                {
+                    Success = true,
+                    Message = "Successfully Saved",
+                };
+            }
+            catch (Exception ex)
+            {
+                
+                return new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                };
+            }
+        }
+
+
+        public async Task<object> GetRoleList()
         {
             try
             {
@@ -276,7 +273,33 @@ namespace Commander.Services{
                 };
             }
         }
+        
+        public async Task<object> GetRoleById(string id)
+        {
+            try
+            {
+                var data = await _context.Roles.Where(w => w.Id == id)
+                .Select(t => new{
+                    t.Id,
+                    t.Name,
+                }).FirstOrDefaultAsync();
 
+                return new
+                {
+                    Success = true,
+                    Record = data
+                };
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    Success = false,
+                    ex.Message
+                };
+            }
+        
+        }
         public async Task<object> GetRolesByHeadId(long id)
         {
             try
@@ -299,7 +322,7 @@ namespace Commander.Services{
                 };
             }
         
-     }   
+        }   
         
         
     }

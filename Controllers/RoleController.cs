@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using System.Linq;
 using System;
+using Microsoft.AspNetCore.Identity;
 
 namespace Commander.Controllers
 {
@@ -23,19 +24,22 @@ namespace Commander.Controllers
             this._services = services;
         }
 
-        [HttpPost, Route("create-or-update")]
-        public async Task<IActionResult> HeadRolesCreateOrUpdate(HeadRolesModel model)
+
+        [HttpPost, Route("CreateOrUpdateHeadRole")]
+        public async Task<IActionResult> CreateOrUpdateHeadRole(HeadRoles model)
         {
-            return Ok(await _services.HeadRolesCreateOrUpdate(model, User.Identity));
+            return Ok(await _services.CreateOrUpdateHeadRole(model, User.Identity));
         }
 
-        [HttpGet, Route("list")]
-        public async Task<IActionResult> GetHeadRolesList(int size, int pageNumber)
+        // Roles Related Endpoints
+
+        [HttpGet, Route("GetHeadRoleList")]
+        public async Task<IActionResult> GetHeadRoleList(int size, int pageNumber)
         {
-            return Ok(await _services.GetHeadRolesList(size, pageNumber));
+            return Ok(await _services.GetHeadRoleList(size, pageNumber));
         }
 
-        [HttpGet, Route("get/{id}")]
+        [HttpGet, Route("GetHeadRolesById/{id}")]
         public async Task<IActionResult> GetHeadRolesById(long id)
         {
             return Ok(await _services.GetHeadRolesById(id));
@@ -46,12 +50,25 @@ namespace Commander.Controllers
         {
             return Ok(await _services.GetHeadRolesDropDownList());
         }
-        
 
-        [HttpGet, Route("permission/list")]
-        public async Task<IActionResult> GetAllRoles()
+        //Roles Related Endpoints
+
+        [HttpPost, Route("CreateRole")]
+        public async Task<IActionResult> CreateRole(IdentityRole model)
         {
-            return Ok(await _services.GetAllRoles());
+            return Ok(await _services.CreateRole(model));
+        }
+
+        [HttpGet, Route("GetRoleList")]
+        public async Task<IActionResult> GetRoleList()
+        {
+            return Ok(await _services.GetRoleList());
+        }
+
+        [HttpGet, Route("GetRoleById/{id}")]
+        public async Task<IActionResult> GetRoleById(string id)
+        {
+            return Ok(await _services.GetRoleById(id));
         }
 
         [HttpGet, Route("{id}/permissions")]

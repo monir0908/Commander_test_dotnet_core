@@ -38,7 +38,7 @@ namespace Commander
     {
         public DateTime CreatedDate { get; set; }
 
-        [Required]
+        
         public string CreatedBy { get; set; }
 
         public DateTime? UpdatedDate { get; set; }

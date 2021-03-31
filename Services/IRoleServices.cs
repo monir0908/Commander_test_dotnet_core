@@ -14,12 +14,19 @@ namespace Commander.Services{
 
     public interface IRoleServices
     {
-        // Role Interfaces
-        Task<object> HeadRolesCreateOrUpdate(HeadRolesModel model, IIdentity identity);
-        Task<object> GetHeadRolesList(int size, int pageNumber);
+        // head Roles Related Interfaces        
+
+        Task<object> CreateOrUpdateHeadRole(HeadRoles model, IIdentity identity);
+        // Task<object> HeadRolesCreateOrUpdate(HeadRolesModel model, IIdentity identity);
+        Task<object> GetHeadRoleList(int size, int pageNumber);
         Task<object> GetHeadRolesById(long id);
         Task<object> GetHeadRolesDropDownList();
-        Task<object> GetAllRoles();
+
+
+        //Roles Related Interfaces
+        Task<object> CreateRole(IdentityRole model);
+        Task<object> GetRoleList();
+        Task<object> GetRoleById(string id);
         Task<object> GetRolesByHeadId(long id);
 
 
