@@ -71,7 +71,7 @@ namespace Commander.Controllers
             return Ok(await _services.GetRoleById(id));
         }
 
-        [HttpGet, Route("{id}/permissions")]
+        [HttpGet, Route("GetRolesByHeadId/{id:long}")]
         public async Task<IActionResult> GetRolesByHeadId(long id)
         {
             return Ok(await _services.GetRolesByHeadId(id));

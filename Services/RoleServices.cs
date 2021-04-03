@@ -21,11 +21,13 @@ namespace Commander.Services{
     {
         private readonly ApplicationDbContext _context;
         private readonly IHubContext<SignalHub> _notificationHubContext;
+        private RoleManager<IdentityRole> _roleManager;
 
-        public RoleServices(ApplicationDbContext context, IHubContext<SignalHub> hubContext)
+        public RoleServices(ApplicationDbContext context, IHubContext<SignalHub> hubContext, RoleManager<IdentityRole> roleManager)
         {
             this._context = context;
             this._notificationHubContext = hubContext;
+            this._roleManager = roleManager;
         }
         public async Task<object> CreateOrUpdateHeadRole(HeadRoles model, IIdentity identity)
         {
@@ -211,30 +213,39 @@ namespace Commander.Services{
 
         public async Task<object> CreateRole(IdentityRole model)
         {
-            
+            bool isEdit = true;
+            IdentityRole item = null;
             try
             {
+                if (model.Id != null)
+                {
+                    item = await _roleManager.FindByIdAsync(model.Id);
+                    if (item == null) throw new Exception("Role not found to update !");
+                }
+                else
+                {
+                    item = new IdentityRole();
+                    isEdit = false;                    
+                }
 
-                //Need to rewrite this piece of code
+                item.Name = model.Name;
 
-                // foreach (var model in models)
-                // {
-                //     if (await _context.Roles.AnyAsync(x => x.Id != model.Id && x.Name == model.Name))
-                //     throw new Exception("One or more roles already exit !");
-                // }
-                
-
-                
-                model.Id = Guid.NewGuid().ToString();               
-                _context.Roles.Add(model);                
-
-                await _context.SaveChangesAsync();             
+                if (!isEdit)
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(model.Name));
+                }
+                else
+                {
+                    _context.Entry(item).State = EntityState.Modified;
+                }
+                await _context.SaveChangesAsync();            
                 
 
                 return new
                 {
                     Success = true,
-                    Message = "Successfully Saved",
+                    Message = "Successfully " + (isEdit ? "Updated" : "Saved"),
+                    item.Id
                 };
             }
             catch (Exception ex)
@@ -253,10 +264,14 @@ namespace Commander.Services{
         {
             try
             {
-                var list = await _context.Roles.OrderBy(o => o.Name)
-                .Select(t => t.Name).ToListAsync();
+                var data = await _context.Roles.OrderBy(o => o.Name)
+                .Select(t => new { t.Name, t.Id}).ToListAsync();
 
-                var data = list.Select(x => new { Id = x, Name = x.Replace("_", " ") }).ToList();
+                // var data = list.Select(x => new { 
+                //     Id = x, 
+                //     Name = x.Replace("_", " ") 
+                // })
+                // .ToList();
 
                 return new
                 {
@@ -305,7 +320,14 @@ namespace Commander.Services{
             try
             {
                 var data = await _context.HeadRoles_Roles.Where(w => w.HeadRoleId == id)
-                .Select(t => t.RoleId).ToListAsync();
+                .Join(_context.Roles,
+                x => x.RoleId,
+                y => y.Id,
+                (x,y) => new{ HeadRoles_Roles = x, Roles = y})
+                .Select(t => new{
+                    t.Roles.Id,
+                    t.Roles.Name
+                }).ToListAsync();
 
                 return new
                 {
