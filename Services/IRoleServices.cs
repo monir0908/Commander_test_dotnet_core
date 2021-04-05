@@ -18,7 +18,7 @@ namespace Commander.Services{
 
         Task<object> CreateOrUpdateHeadRole(HeadRoles model, IIdentity identity);
         // Task<object> HeadRolesCreateOrUpdate(HeadRolesModel model, IIdentity identity);
-        Task<object> GetHeadRoleList(int size, int pageNumber);
+        Task<object> GetHeadRoleList();
         Task<object> GetHeadRolesById(long id);
         Task<object> GetHeadRolesDropDownList();
 
@@ -29,7 +29,7 @@ namespace Commander.Services{
         Task<object> GetRoleById(string id);
         Task<object> GetRolesByHeadId(long id);
 
-
+        Task<object> MergeHeadRoleWithRoles(IEnumerable<HeadRoles_Roles> objs);
 
     }
 }

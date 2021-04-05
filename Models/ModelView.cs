@@ -41,4 +41,10 @@ namespace Commander{
         public string Description { get; set; }
         public virtual List<string> Roles { get; set; }
     }
+
+
+    public class RoleList
+    {   
+        public string Name{ get; set; }
+    }
 }

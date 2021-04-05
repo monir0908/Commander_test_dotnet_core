@@ -34,9 +34,9 @@ namespace Commander.Controllers
         // Roles Related Endpoints
 
         [HttpGet, Route("GetHeadRoleList")]
-        public async Task<IActionResult> GetHeadRoleList(int size, int pageNumber)
+        public async Task<IActionResult> GetHeadRoleList()
         {
-            return Ok(await _services.GetHeadRoleList(size, pageNumber));
+            return Ok(await _services.GetHeadRoleList());
         }
 
         [HttpGet, Route("GetHeadRolesById/{id}")]
@@ -78,7 +78,11 @@ namespace Commander.Controllers
         }
 
         
-        
+        [HttpPost, Route("MergeHeadRoleWithRoles")]
+        public async Task<IActionResult> MergeHeadRoleWithRoles(IEnumerable<HeadRoles_Roles> objs)
+        {
+            return Ok(await _services.MergeHeadRoleWithRoles(objs));
+        }
         
 
 

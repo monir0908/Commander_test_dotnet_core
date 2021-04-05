@@ -103,7 +103,7 @@ namespace Commander.Services{
 
         
 
-        public async Task<object> GetHeadRoleList(int size, int pageNumber)
+        public async Task<object> GetHeadRoleList()
         {
             try
             {
@@ -132,8 +132,6 @@ namespace Commander.Services{
                     .Select(x => x.Roles.Name).ToList(),
 
                 })
-                .Skip(pageNumber * size)
-                .Take(size)
                 .ToList();
             
             
@@ -217,11 +215,19 @@ namespace Commander.Services{
             IdentityRole item = null;
             try
             {
+
+                if (model.Id == null)
+                {
+                    item = await _roleManager.FindByNameAsync(model.Name);
+                    if (item != null) throw new Exception("Role exists !");
+                }
+
+
                 if (model.Id != null)
                 {
                     item = await _roleManager.FindByIdAsync(model.Id);
                     if (item == null) throw new Exception("Role not found to update !");
-                }
+                }                
                 else
                 {
                     item = new IdentityRole();
@@ -346,7 +352,43 @@ namespace Commander.Services{
         
         }   
         
+        public async Task<object> MergeHeadRoleWithRoles(IEnumerable<HeadRoles_Roles> objs){
+
+            long headRoleId = objs.Select(x => x.HeadRoleId).FirstOrDefault();
+            
+            try
+            {
+                // Removing first
+                _context.HeadRoles_Roles.RemoveRange(_context.HeadRoles_Roles.Where(x => x.HeadRoleId == headRoleId));
+                _context.SaveChanges(); 
+
+                // Then, adding
+                foreach (var item in objs)
+                {
+                    _context.HeadRoles_Roles.Add(item);                   
+                    await _context.SaveChangesAsync();
+                }
+
+                return new
+                {
+                    Success = true,
+                    Message = "Successfully merged",
+                };
+            }
+            catch (Exception ex)
+            {
+                
+                return new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                };
+            }
+
+        }
+    
         
+    
     }
 }
 

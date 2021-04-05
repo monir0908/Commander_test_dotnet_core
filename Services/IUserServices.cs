@@ -15,6 +15,7 @@ namespace Commander.Services{
         // User Related Interfaces
         
         Task<object> GetUserList(int size, int pageNumber);
+        Task<object> CreateUser(ApplicationUser model, IEnumerable<RoleList> roleList);
 
     }
 }

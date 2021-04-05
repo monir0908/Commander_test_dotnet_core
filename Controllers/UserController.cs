@@ -30,6 +30,19 @@ namespace Commander.Controllers
         {
             return Ok(await _services.GetUserList(size, pageNumber));
         }
+
+        [HttpPost, Route("CreateUser")]
+        public async Task<IActionResult> CreateUser(JObject objData)
+        {
+            dynamic jsonData = objData;
+
+            JObject UserObjJson = jsonData.userObj;
+            var user = UserObjJson.ToObject<ApplicationUser>();
+
+            JArray roleListJson = jsonData.roleList;
+            var roleList = roleListJson.Select(item => item.ToObject<RoleList>()).ToList();
+            return Ok(await _services.CreateUser(user, roleList));
+        }
         
 
 
