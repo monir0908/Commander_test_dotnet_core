@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using System.Text.Json;
 using Commander.Models;
@@ -41,7 +42,21 @@ namespace Commander
             // For Identity  
             services.AddIdentity<ApplicationUser, IdentityRole>()  
                 .AddEntityFrameworkStores<ApplicationDbContext>()  
-                .AddDefaultTokenProviders();  
+                .AddDefaultTokenProviders(); 
+
+
+            // Without the followings, it won't allow saving password
+            services.Configure<IdentityOptions>(x => {
+            x.Password.RequireDigit = false;
+            x.Password.RequiredLength = 2;
+            x.Password.RequireUppercase = false;
+            x.Password.RequireLowercase = false;
+            x.Password.RequireNonAlphanumeric = false;
+            x.Password.RequiredUniqueChars = 0;
+            x.Lockout.AllowedForNewUsers = true;
+            x.Lockout.MaxFailedAccessAttempts = 5;
+            x.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromSeconds(30);
+            });
   
             // Adding Authentication  
             services.AddAuthentication(options =>  

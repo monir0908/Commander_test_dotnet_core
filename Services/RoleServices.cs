@@ -242,7 +242,8 @@ namespace Commander.Services{
                 }
                 else
                 {
-                    _context.Entry(item).State = EntityState.Modified;
+                    await _roleManager.UpdateAsync(new IdentityRole(model.Name));
+                    // _context.Entry(item).State = EntityState.Modified;
                 }
                 await _context.SaveChangesAsync();            
                 

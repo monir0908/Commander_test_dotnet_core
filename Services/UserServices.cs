@@ -78,8 +78,8 @@ namespace Commander.Services{
             bool isEdit = true;
             try
             {
-                if (await _context.Users.AnyAsync(x => x.Id == model.Id))
-                    throw new Exception("Already exists: " + model.FirstName);
+                if (await _context.Users.AnyAsync(x => x.Id != model.Id && x.Email == model.Email))
+                    throw new Exception("Already exists: " + model.Email);
 
                 if (model.Id != null)
                 {
@@ -98,6 +98,7 @@ namespace Commander.Services{
                 item.PhoneNumber = model.PhoneNumber;
                 item.Email = model.Email;
                 item.UserType = model.UserType;
+                item.HeadRoleId = model.HeadRoleId;
 
                 try
                     {
@@ -111,13 +112,15 @@ namespace Commander.Services{
                                 FirstName = item.FirstName, 
                                 LastName = item.LastName, 
                                 UserType = item.UserType, 
+                                HeadRoleId = item.HeadRoleId, 
                                 IsActive = true, 
                             };
 
                             
                             // _context.Users.Add(item);
+                            var password = "BacBon@admin";
 
-                            result = await userManager.CreateAsync(user);
+                            result = await userManager.CreateAsync(user,password);
                             if (!result.Succeeded) throw new Exception("Error on user creation: <br/>" + string.Join("<br/>", result.Errors));
 
                             if (roles.Any())
@@ -136,6 +139,7 @@ namespace Commander.Services{
                             user.FirstName = item.FirstName;
                             user.LastName = item.LastName;
                             user.PhoneNumber = item.PhoneNumber;
+                            user.HeadRoleId = item.HeadRoleId;
                             result = await userManager.UpdateAsync(user);
                             if (!result.Succeeded) throw new Exception("Error on user update: " + string.Join(", ", result.Errors));
 
@@ -178,7 +182,47 @@ namespace Commander.Services{
             }
         }
         
-        
+        public async Task<object> GetUserDetailWithRoles(string id)
+        {
+            try
+            {
+                var user = await _context.Users
+                .FindAsync(id);
+
+                if (user == null) throw new Exception("No User Found");
+
+                var roles = await userManager.GetRolesAsync(user);
+
+
+                var data = new {
+                    user.Id,
+                    user.UserType,
+                    user.FirstName,
+                    user.LastName,
+                    user.Email,
+                    user.HeadRoleId,
+                    user.PhoneNumber,
+
+                };
+
+
+                
+
+                return new
+                {
+                    Success = true,
+                    Record = new { User = data, Roles = roles.ToArray() }
+                };
+            }
+            catch (Exception ex)
+            {
+                return new
+                {
+                    Success = false,
+                    Message = ex.InnerException?.Message ?? ex.Message
+                };
+            }
+        }
         
     }
 }

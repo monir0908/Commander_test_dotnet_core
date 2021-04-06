@@ -72,8 +72,8 @@ namespace Commander.Controllers
                     Email= user.Email,
                     PhoneNumber= user.PhoneNumber,
                     UserType= user.UserType,
-                    IsAdmin= user.IsAdmin,
-                    IsSuperUser= user.IsSuperUser,
+                    // IsAdmin= user.IsAdmin,
+                    // IsSuperUser= user.IsSuperUser,
                     Roles= userRoles.Any()? JsonConvert.SerializeObject(userRoles) : "",
                     IsActive= user.IsActive,
                 });  

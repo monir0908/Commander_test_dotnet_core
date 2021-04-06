@@ -16,6 +16,7 @@ namespace Commander.Services{
         
         Task<object> GetUserList(int size, int pageNumber);
         Task<object> CreateUser(ApplicationUser model, IEnumerable<RoleList> roleList);
+        Task<object> GetUserDetailWithRoles(string id);
 
     }
 }

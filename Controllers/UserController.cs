@@ -43,6 +43,12 @@ namespace Commander.Controllers
             var roleList = roleListJson.Select(item => item.ToObject<RoleList>()).ToList();
             return Ok(await _services.CreateUser(user, roleList));
         }
+
+        [HttpGet, Route("GetUserDetailWithRoles/{id}")]
+        public async Task<IActionResult> GetUserDetailWithRoles(string id)
+        {
+            return Ok(await _services.GetUserDetailWithRoles(id));
+        }
         
 
 
